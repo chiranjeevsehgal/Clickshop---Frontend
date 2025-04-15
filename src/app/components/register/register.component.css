@@ -1,0 +1,19 @@
+/* register.component.css */
+/* Most styling is handled by Tailwind classes in the HTML */
+/* Add custom animations or transitions here if needed */
+
+@keyframes pageFlip {
+    0% {
+      transform: rotateY(0deg);
+    }
+    100% {
+      transform: rotateY(-5deg);
+    }
+  }
+  
+  /* You can add this class to elements for a subtle page-turning effect */
+  .page-turn {
+    animation: pageFlip 0.5s ease-in-out forwards;
+    transform-origin: left center;
+    backface-visibility: hidden;
+  }

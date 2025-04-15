@@ -1,0 +1,104 @@
+<!-- Navigation Bar -->
+<app-navbar></app-navbar>
+<div class="bg-gray-100 min-h-screen py-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-2xl font-bold text-gray-900">My Orders</h1>
+      <a routerLink="/products" class="text-blue-600 hover:text-blue-800 font-medium">
+        Continue Shopping
+      </a>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ errorMessage }}
+    </div>
+
+    <!-- No Orders -->
+    <div *ngIf="!isLoading && orders.length === 0 && !errorMessage" class="bg-white rounded-lg shadow p-8 text-center">
+      <div class="text-gray-500 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h2 class="text-xl font-medium text-gray-900 mb-2">No orders yet</h2>
+      <p class="text-gray-600 mb-4">You haven't placed any orders with us yet.</p>
+      <button routerLink="/products" class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition duration-300">
+        Start Shopping
+      </button>
+    </div>
+
+    <!-- Orders List -->
+    <div *ngIf="!isLoading && orders.length > 0" class="space-y-6">
+      <div *ngFor="let order of orders" class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- Order Header -->
+        <div class="p-6 cursor-pointer" (click)="toggleOrderDetails(order.orderId)">
+          <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="text-lg font-medium text-gray-900">Order #{{ order.orderId }}</h3>
+                <span [class]="'px-2 py-1 text-xs font-semibold rounded-full ' + getOrderStatusClass(order.status)">
+                  {{ order.status || 'Ordered' }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-500 mt-1">{{ getFormattedDate(order.orderDate) }}</p>
+            </div>
+            <div class="mt-2 md:mt-0 flex items-center space-x-4">
+              <p class="font-medium">{{ getFormattedPrice(order.totalAmount)}}</p>
+              <div class="flex items-center">
+                <span class="text-sm text-gray-600 mr-2">Details</span>
+                <svg xmlns="http://www.w3.org/2000/svg" [class]="expandedOrderId === order.orderId ? 'transform rotate-180' : ''" class="h-5 w-5 text-gray-500 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Order Details (Expandable) -->
+        <div *ngIf="expandedOrderId === order.orderId" class="border-t border-gray-200">
+          <!-- Items -->
+          <div class="bg-gray-50 px-6 py-3">
+            <h4 class="text-sm font-medium text-gray-900">Items</h4>
+          </div>
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div *ngFor="let item of order.items" class="flex flex-col sm:flex-row justify-between py-3 border-b border-gray-100 last:border-0">
+              <div class="flex items-center">
+                <div class="flex-1">
+                  <p class="font-medium text-gray-900">{{ item.product?.name || item.productName }}</p>
+                  <p class="text-sm text-gray-500">Quantity: {{ item.quantity }}</p>
+                </div>
+              </div>
+              <div class="mt-2 sm:mt-0">
+                <p class="font-medium text-gray-900">{{ getFormattedPrice((item.product?.price || item.price) * item.quantity) }}</p>
+                <p class="text-sm text-gray-500">{{ getFormattedPrice(item.product?.price || item.price) }} each</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Shipping Details -->
+          <div class="bg-gray-50 px-6 py-3">
+            <h4 class="text-sm font-medium text-gray-900">Shipping Details</h4>
+          </div>
+          <div class="px-6 py-4 border-b border-gray-200">
+            <p class="text-gray-700 whitespace-pre-line">{{ order.deliveryAddress || 'Address not provided' }}</p>
+          </div>
+          
+          <!-- Payment Information -->
+          <div class="bg-gray-50 px-6 py-3">
+            <h4 class="text-sm font-medium text-gray-900">Payment Information</h4>
+          </div>
+          <div class="px-6 py-4">
+            <p class="text-gray-700">Method: {{ order.paymentMethod || 'Not specified' }}</p>
+            <p class="text-gray-700 mt-2">Total: {{ getFormattedPrice(order.totalAmount) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

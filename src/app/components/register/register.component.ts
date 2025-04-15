@@ -1,0 +1,146 @@
+// register.component.ts
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/authService/auth.service';
+
+@Component({
+  selector: 'app-register',
+  standalone: false,
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.css']
+})
+export class RegisterComponent {
+  registerForm: FormGroup;
+  isSubmitting = false;
+  errorMessage = '';
+  showPassword = false;
+  currentStep = 1;
+  totalSteps = 3;
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.registerForm = this.formBuilder.group({
+      // Step 1: Account Details
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required, Validators.minLength(4)]],
+      
+      // Step 2: Security
+      password: ['', [
+        Validators.required, 
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+      ]],
+      confirmPassword: ['', [Validators.required]],
+      
+      // Step 3: Contact & Address
+      contactNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      addressLine1: ['', [Validators.required]],
+      addressLine2: [''],
+      city: ['', [Validators.required]],
+      state: ['', [Validators.required]],
+      zipCode: ['', [Validators.required, Validators.pattern(/^\d{6}(-\d{4})?$/)]]
+    }, {
+      validators: this.passwordMatchValidator
+    });
+  }
+
+  passwordMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  nextStep() {
+    if (this.currentStep === 1) {
+      if (this.validateStep1()) {
+        this.currentStep++;
+      }
+    } else if (this.currentStep === 2) {
+      if (this.validateStep2()) {
+        this.currentStep++;
+      }
+    }
+  }
+
+  previousStep() {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    }
+  }
+
+  validateStep1(): boolean {
+    const nameControl = this.registerForm.get('name');
+    const emailControl = this.registerForm.get('email');
+    const usernameControl = this.registerForm.get('username');
+    
+    nameControl?.markAsTouched();
+    emailControl?.markAsTouched();
+    usernameControl?.markAsTouched();
+    
+    return nameControl?.valid && emailControl?.valid && usernameControl?.valid ? true : false;
+  }
+
+  validateStep2(): boolean {
+    const passwordControl = this.registerForm.get('password');
+    const confirmPasswordControl = this.registerForm.get('confirmPassword');
+    
+    passwordControl?.markAsTouched();
+    confirmPasswordControl?.markAsTouched();
+    
+    return passwordControl?.valid && confirmPasswordControl?.valid && 
+           !this.registerForm.hasError('passwordMismatch') ? true : false;
+  }
+
+  onSubmit() {
+    if (this.registerForm.invalid) {
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    const registerData = {
+      name: this.registerForm.get('name')?.value,
+      email: this.registerForm.get('email')?.value,
+      username: this.registerForm.get('username')?.value,
+      password: this.registerForm.get('password')?.value,
+      contactNumber: this.registerForm.get('contactNumber')?.value,
+      address: {
+        addressLine1: this.registerForm.get('addressLine1')?.value,
+        addressLine2: this.registerForm.get('addressLine2')?.value,
+        city: this.registerForm.get('city')?.value,
+        state: this.registerForm.get('state')?.value,
+        zipCode: this.registerForm.get('zipCode')?.value
+      }
+    };
+
+    this.authService.register(registerData).subscribe({
+      next: (response: any) => {
+        // Handle successful registration
+        this.router.navigate(['/login'], { 
+          queryParams: { registered: 'true' } 
+        });
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      }
+    });
+  }
+  
+  getProgressPercentage(): number {
+    return ((this.currentStep - 1) / (this.totalSteps - 1)) * 100;
+  }
+}
