@@ -103,8 +103,9 @@ export class AdminServiceService {
    * Add a new product
    */
   addProduct(productData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/admin/products`, productData, {
-      withCredentials: true
+    return this.http.post(`${this.apiUrl_Product}/add`, productData, {
+      withCredentials: true,
+      responseType: 'text'
     });
   }
   

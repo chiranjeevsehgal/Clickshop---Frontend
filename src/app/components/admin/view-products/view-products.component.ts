@@ -128,7 +128,7 @@ export class ViewProductsComponent implements OnInit {
         this.filterProducts(); // This will also update displayedProducts
         
         // Show success message
-        this.successMessage = `${this.productToDelete.name} product has been deleted successfully`;
+        this.successMessage = `Product "${this.productToDelete.name}" has been deleted successfully`;
         
         // Reset modal state
         this.showDeleteModal = false;

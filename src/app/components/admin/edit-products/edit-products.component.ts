@@ -76,9 +76,8 @@ export class EditProductsComponent {
   }
 
   loadCategories(): void {
-    // This could fetch categories from the backend
+    // This would fetch categories from the backend
     // For now, we're using a static list
-    // If you want to fetch from API, uncomment and adjust the following:
     /*
     this.adminService.getCategories().subscribe({
       next: (categories) => {
