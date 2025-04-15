@@ -12,6 +12,8 @@ import { ViewUsersComponent } from './components/admin/view-users/view-users.com
 import { AdminGuard } from './admin.guard';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard/admin-dashboard.component';
 import { ViewAdminsComponent } from './components/admin/view-admins/view-admins.component';
+import { ViewProductsComponent } from './components/admin/view-products/view-products.component';
+import { EditProductsComponent } from './components/admin/edit-products/edit-products.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -32,9 +34,9 @@ const routes: Routes = [
       { path: 'dashboard', component: AdminDashboardComponent },
       { path: 'viewusers', component: ViewUsersComponent },
       { path: 'viewadmins', component: ViewAdminsComponent },
-      // { path: 'products', component: ProductListComponent },
+      { path: 'viewproducts', component: ViewProductsComponent },
+      { path: 'viewproducts/edit/:id', component: EditProductsComponent },
       // { path: 'products/add', component: ProductFormComponent },
-      // { path: 'products/edit/:id', component: ProductFormComponent },
       // { path: 'orders', component: OrderManagementComponent },
       // { path: 'orders/:id', component: OrderDetailsComponent },
       // { path: 'settings', component: AdminSettingsComponent }

@@ -21,6 +21,8 @@ import { AdminSidebarComponent } from './components/reusable/admin-sidebar/admin
 import { AdminHeaderComponent } from './components/reusable/admin-header/admin-header.component';
 import { AdminLayoutComponent } from './components/reusable/admin-layout/admin-layout.component';
 import { ViewAdminsComponent } from './components/admin/view-admins/view-admins.component';
+import { ViewProductsComponent } from './components/admin/view-products/view-products.component';
+import { EditProductsComponent } from './components/admin/edit-products/edit-products.component';
 
 @NgModule({
   declarations: [
@@ -39,6 +41,8 @@ import { ViewAdminsComponent } from './components/admin/view-admins/view-admins.
     AdminHeaderComponent,
     AdminLayoutComponent,
     ViewAdminsComponent,
+    ViewProductsComponent,
+    EditProductsComponent,
 
   ],
   imports: [

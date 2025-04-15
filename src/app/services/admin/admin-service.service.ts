@@ -7,6 +7,7 @@ import { catchError, Observable, of } from 'rxjs';
 })
 export class AdminServiceService {
   private apiUrl = 'http://localhost:8081/admin';
+  private apiUrl_Product = 'http://localhost:8081/product';
 
   constructor(private http: HttpClient) { }
 
@@ -78,34 +79,67 @@ export class AdminServiceService {
 
   // Product management
   getAllProducts(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/products`, {
+    return this.http.get<any[]>(`${this.apiUrl}/viewproducts`, {
       withCredentials: true
-    });
+    }).pipe(
+      catchError(error => {
+        console.error('Error fetching products:', error);
+        // Return empty array in case of error
+        return of([]);
+      })
+    );
   }
-
+  
+  /**
+   * Get a single product by ID
+   */
   getProductById(productId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/products/${productId}`, {
+    return this.http.get<any>(`${this.apiUrl_Product}/${productId}`, {
       withCredentials: true
     });
   }
-
+  
+  /**
+   * Add a new product
+   */
   addProduct(productData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/products`, productData, {
+    return this.http.post<any>(`${this.apiUrl}/admin/products`, productData, {
       withCredentials: true
     });
   }
-
+  
+  /**
+   * Update an existing product
+   */
   updateProduct(productId: number, productData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/products/${productId}`, productData, {
-      withCredentials: true
+    return this.http.put(`${this.apiUrl_Product}/update/${productId}`, productData, {
+      withCredentials: true,
+      responseType: 'text'
     });
   }
-
+  
+  /**
+   * Delete a product
+   */
   deleteProduct(productId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/products/${productId}`, {
+    return this.http.delete(`${this.apiUrl_Product}/delete/${productId}`, {
+      withCredentials: true,
+      responseType: 'text' 
+    });
+  }
+  
+  /**
+   * Upload product image
+   */
+  uploadProductImage(productId: number, imageFile: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    return this.http.post<any>(`${this.apiUrl_Product}/admin/products/${productId}/image`, formData, {
       withCredentials: true
     });
   }
+  
 
   // Order management
   getAllOrders(): Observable<any[]> {
