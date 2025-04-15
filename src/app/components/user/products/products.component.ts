@@ -4,6 +4,8 @@ import { Product } from '../../../models/Product';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../../services/cart/get-cart.service';
+import { HotToastService } from '@ngxpert/hot-toast';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-products',
@@ -21,7 +23,8 @@ export class ProductsComponent implements OnInit {
   constructor(
     private productService: ProductServiceService,
     private cartService: CartService,
-    private router: Router
+    private router: Router,
+    private toast:HotToastService
   ) { }
 
   ngOnInit(): void {
@@ -60,15 +63,22 @@ export class ProductsComponent implements OnInit {
   }
 
   addToCart(product: Product): void {
-    this.productService.addToCart(product).subscribe({
+    this.productService.addToCart(product).pipe(
+      this.toast.observe({
+        loading: 'Adding to cart...',
+        success: (res) => res.message || 'Product added to cart successfully!',
+        error: 'Failed to add product to cart. Please try again.'
+      }),
+      catchError((error) => {
+        console.error('Error adding to cart:', error);
+        return of(error);
+      })
+    ).subscribe({
       next: (res) => {
-        alert(res.message); 
         this.cartService.refreshCartCount();
       },
-      error: (err) => {
-        console.error('Error adding to cart:', err);
-        alert('Failed to add product to cart.');
-      }
+      
+      error: () => {} // Empty error handler since toast handles it
     });
   }
 

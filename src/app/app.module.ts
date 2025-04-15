@@ -23,6 +23,10 @@ import { AdminLayoutComponent } from './components/reusable/admin-layout/admin-l
 import { ViewAdminsComponent } from './components/admin/view-admins/view-admins.component';
 import { ViewProductsComponent } from './components/admin/view-products/view-products.component';
 import { EditProductsComponent } from './components/admin/edit-products/edit-products.component';
+import { OrderManageComponent } from './components/admin/order-manage/order-manage.component';
+import { OrderDetailComponent } from './components/admin/order-detail/order-detail.component';
+import { provideHotToastConfig } from '@ngxpert/hot-toast';
+
 
 @NgModule({
   declarations: [
@@ -43,6 +47,8 @@ import { EditProductsComponent } from './components/admin/edit-products/edit-pro
     ViewAdminsComponent,
     ViewProductsComponent,
     EditProductsComponent,
+    OrderManageComponent,
+    OrderDetailComponent,
 
   ],
   imports: [
@@ -57,7 +63,11 @@ import { EditProductsComponent } from './components/admin/edit-products/edit-pro
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
-    }
+    },
+    provideHotToastConfig({
+      duration: 3000,
+      position: 'top-center'
+    })
   ],
   bootstrap: [AppComponent]
 })

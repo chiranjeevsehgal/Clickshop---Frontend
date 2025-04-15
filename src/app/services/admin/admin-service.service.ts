@@ -8,6 +8,7 @@ import { catchError, Observable, of } from 'rxjs';
 export class AdminServiceService {
   private apiUrl = 'http://localhost:8081/admin';
   private apiUrl_Product = 'http://localhost:8081/product';
+  private apiUrl_Orders = 'http://localhost:8081/orders';
 
   constructor(private http: HttpClient) { }
 
@@ -144,19 +145,34 @@ export class AdminServiceService {
 
   // Order management
   getAllOrders(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/orders`, {
+    return this.http.get<any[]>(`${this.apiUrl_Orders}/all`, {
       withCredentials: true
     });
   }
 
   getOrderById(orderId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/orders/${orderId}`, {
+    return this.http.get<any>(`${this.apiUrl_Orders}/${orderId}`, {
       withCredentials: true
     });
   }
 
   updateOrderStatus(orderId: number, status: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/orders/${orderId}/status`, { status }, {
+    return this.http.put(`${this.apiUrl_Orders}/${orderId}/status`, { status }, {
+      withCredentials: true
+    });
+  }
+  
+  cancelOrder(orderId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl_Orders}/${orderId}/cancel`, {}, {
+      withCredentials: true
+    });
+  }
+
+  /**
+   * Get orders by status
+   */
+  getOrdersByStatus(status: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl_Orders}/status/${status}`, {
       withCredentials: true
     });
   }

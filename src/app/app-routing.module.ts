@@ -14,6 +14,8 @@ import { AdminDashboardComponent } from './components/admin/admin-dashboard/admi
 import { ViewAdminsComponent } from './components/admin/view-admins/view-admins.component';
 import { ViewProductsComponent } from './components/admin/view-products/view-products.component';
 import { EditProductsComponent } from './components/admin/edit-products/edit-products.component';
+import { OrderManageComponent } from './components/admin/order-manage/order-manage.component';
+import { OrderDetailComponent } from './components/admin/order-detail/order-detail.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -37,8 +39,8 @@ const routes: Routes = [
       { path: 'viewproducts', component: ViewProductsComponent },
       { path: 'viewproducts/edit/:id', component: EditProductsComponent },
       { path: 'viewproducts/add', component: EditProductsComponent },
-      // { path: 'orders', component: OrderManagementComponent },
-      // { path: 'orders/:id', component: OrderDetailsComponent },
+      { path: 'vieworders', component: OrderManageComponent  },
+      { path: 'vieworders/:id', component: OrderDetailComponent },
       // { path: 'settings', component: AdminSettingsComponent }
     ]
   }

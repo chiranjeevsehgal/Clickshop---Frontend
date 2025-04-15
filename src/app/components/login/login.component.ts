@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/authService/auth.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 
 @Component({
@@ -21,7 +22,8 @@ export class LoginComponent {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toast:HotToastService
   ) {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required]],
@@ -52,6 +54,7 @@ export class LoginComponent {
       next: (response: any) => {
         // Handle successful login
         console.log('Login success:', response);
+        this.toast.success("Succesfully logged in")
         
         // Store user info if needed
         if (response.userId) {
@@ -75,6 +78,7 @@ export class LoginComponent {
         console.error('Login error:', error);
         this.isSubmitting = false;
         this.errorMessage = error.error?.message || 'Login failed. Please try again.';
+        this.toast.error(error.error?.message || "Login failed. Please try again")
       },
       complete: () => {
         this.isSubmitting = false;
