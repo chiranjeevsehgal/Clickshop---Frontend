@@ -20,10 +20,10 @@ import { WishlistComponent } from './components/user/wishlist/wishlist.component
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/products', pathMatch: 'full' },
   { path: 'register', component: RegisterComponent,},
-  { path: 'products', component: ProductsComponent, canActivate: [AuthGuard]},
-  { path: 'product/:id', component: ProductDetailComponent, canActivate: [AuthGuard] },
+  { path: 'products', component: ProductsComponent},
+  { path: 'product/:id', component: ProductDetailComponent },
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },

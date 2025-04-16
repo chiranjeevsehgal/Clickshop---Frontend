@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartService } from '../../../services/cart/get-cart.service';
 import { AuthService } from '../../../services/authService/auth.service';
-
+import { HotToastService } from '@ngxpert/hot-toast';
 
 @Component({
   selector: 'app-navbar',
@@ -16,20 +16,33 @@ export class NavbarComponent implements OnInit {
   constructor(
     private cartService: CartService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toast: HotToastService
   ) { }
 
   ngOnInit(): void {
-    this.cartService.refreshCartCount();
+    // Only refresh cart count if user is logged in
+    if (this.isLoggedIn()) {
+      this.cartService.refreshCartCount();
+    }
+    
     this.cartService.cartCount$.subscribe(count => {
       this.cartCount = count;
     });
   }
 
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  login(): void {
+    this.router.navigate(['/login']);
+  }
+
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
-        // Redirect to login page after successful logout
+        this.toast.success('Logged out successfully');
         this.router.navigate(['/login']);
       },
       error: (error) => {
@@ -38,5 +51,31 @@ export class NavbarComponent implements OnInit {
         this.router.navigate(['/login']);
       }
     });
+  }
+
+  handleCartClick(event: Event): void {
+    event.preventDefault();
+    
+    if (this.isLoggedIn()) {
+      // User is logged in, navigate to cart
+      this.router.navigate(['/cart']);
+    } else {
+      // User is not logged in, show toast and navigate to login
+      this.toast.info('Please login to access your cart');
+      this.router.navigate(['/login']);
+    }
+  }
+
+  handleWishlistClick(event: Event): void {
+    event.preventDefault();
+    
+    if (this.isLoggedIn()) {
+      // User is logged in, navigate to wishlist
+      this.router.navigate(['/wishlist']);
+    } else {
+      // User is not logged in, show toast and navigate to login
+      this.toast.info('Please login to access your wishlist');
+      this.router.navigate(['/login']);
+    }
   }
 }

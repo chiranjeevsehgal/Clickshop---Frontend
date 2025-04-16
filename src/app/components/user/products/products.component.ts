@@ -33,6 +33,7 @@ export class ProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadWishlist()
   }
 
   loadProducts(): void {
@@ -68,21 +69,30 @@ export class ProductsComponent implements OnInit {
 
   addToCart(product: Product): void {
     this.productService.addToCart(product).pipe(
-      this.toast.observe({
-        loading: 'Adding to cart...',
-        success: (res) => res.message || 'Product added to cart successfully!',
-        error: 'Failed to add product to cart. Please try again.'
-      }),
       catchError((error) => {
         console.error('Error adding to cart:', error);
-        return of(error);
+        
+        if (error.status === 401 && error.error && error.error.message === 'Please login to add items to cart') {
+          this.toast.info(error.error.message || 'Please login to add items to cart');
+          return of({ _handled: true, originalError: error });
+        }
+        
+        this.toast.error('Failed to add product to cart. Please try again.');
+        return of({ _handled: true, originalError: error });
       })
     ).subscribe({
       next: (res) => {
+        if (res && res._handled) {
+          return;
+        }
+        
+        // Success case
+        if (res.message) {
+          this.toast.success(res.message);
+        }
         this.cartService.refreshCartCount();
       },
-      
-      error: () => {} // Empty error handler since toast handles it
+      error: () => {} // Should never get here because of catchError
     });
   }
 
@@ -126,7 +136,13 @@ export class ProductsComponent implements OnInit {
       },
       error => {
         console.error('Error adding to wishlist:', error);
-        this.toast.error('Failed to add product to wishlist');
+        
+        // Check if the error contains a login required message
+        if (error.status === 401 || (error.error && error.error.message === 'Please login to add items to wishlist')) {
+          this.toast.info('Please login to add items to wishlist');
+        } else {
+          this.toast.error('Failed to add product to wishlist');
+        }
       }
     );
   }

@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductServiceService } from '../../../services/productService/product-service.service';
 import { Product } from '../../../models/Product';
 import { CartService } from '../../../services/cart/get-cart.service';
+import { catchError, of } from 'rxjs';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 @Component({
   selector: 'app-product-detail',
@@ -24,7 +26,8 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cartService: CartService,
-    private productService: ProductServiceService
+    private productService: ProductServiceService,
+    private toast:HotToastService
   ) { }
 
   ngOnInit(): void {
@@ -65,15 +68,32 @@ export class ProductDetailComponent implements OnInit {
 
   addToCart(): void {
     if (this.product) {
-      this.productService.addToCart(this.product, this.quantity).subscribe({
+      
+      this.productService.addToCart(this.product, this.quantity).pipe(
+        catchError((error) => {
+          console.error('Error adding to cart:', error);
+          
+          if (error.status === 401 && error.error && error.error.message === 'Please login to add items to cart') {
+            this.toast.info(error.error.message || 'Please login to add items to cart');
+            return of({ _handled: true, originalError: error });
+          }
+          
+          this.toast.error('Failed to add product to cart. Please try again.');
+          return of({ _handled: true, originalError: error });
+        })
+      ).subscribe({
         next: (res) => {
-          alert(res.message); 
+          if (res && res._handled) {
+            return;
+          }
+          
+          // Success case
+          if (res.message) {
+            this.toast.success(res.message);
+          }
           this.cartService.refreshCartCount();
         },
-        error: (err) => {
-          console.error('Error adding to cart:', err);
-          alert('Failed to add product to cart.');
-        }
+        error: () => {} // Should never get here because of catchError
       });
     }
   }
