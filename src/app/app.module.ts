@@ -26,6 +26,7 @@ import { EditProductsComponent } from './components/admin/edit-products/edit-pro
 import { OrderManageComponent } from './components/admin/order-manage/order-manage.component';
 import { OrderDetailComponent } from './components/admin/order-detail/order-detail.component';
 import { provideHotToastConfig } from '@ngxpert/hot-toast';
+import { WishlistComponent } from './components/user/wishlist/wishlist.component';
 
 
 @NgModule({
@@ -49,6 +50,7 @@ import { provideHotToastConfig } from '@ngxpert/hot-toast';
     EditProductsComponent,
     OrderManageComponent,
     OrderDetailComponent,
+    WishlistComponent,
 
   ],
   imports: [

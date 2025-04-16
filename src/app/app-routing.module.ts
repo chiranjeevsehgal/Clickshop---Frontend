@@ -16,6 +16,7 @@ import { ViewProductsComponent } from './components/admin/view-products/view-pro
 import { EditProductsComponent } from './components/admin/edit-products/edit-products.component';
 import { OrderManageComponent } from './components/admin/order-manage/order-manage.component';
 import { OrderDetailComponent } from './components/admin/order-detail/order-detail.component';
+import { WishlistComponent } from './components/user/wishlist/wishlist.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -26,6 +27,7 @@ const routes: Routes = [
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+  { path: 'wishlist', component: WishlistComponent, canActivate: [AuthGuard] },
   
   // Admin route
   {
