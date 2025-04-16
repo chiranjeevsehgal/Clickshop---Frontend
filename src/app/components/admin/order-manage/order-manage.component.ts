@@ -125,7 +125,7 @@ export class OrderManageComponent {
   }
 
   viewOrderDetails(order: any): void {
-    this.router.navigate(['/admin/vieworders', order.orderId]);
+    this.router.navigate(['/admin/vieworders', order.id]);
   }
 
   openStatusModal(order: any): void {
@@ -147,15 +147,15 @@ export class OrderManageComponent {
     
     this.isUpdating = true;
     
-    this.orderService.updateOrderStatus(this.orderToUpdate.orderId, this.newStatus).subscribe({
+    this.orderService.updateOrderStatus(this.orderToUpdate.id, this.newStatus).subscribe({
       next: () => {
         // Update the order status in the local array
-        const order = this.orders.find(o => o.orderId === this.orderToUpdate.orderId);
+        const order = this.orders.find(o => o.id === this.orderToUpdate.id);
         if (order) {
           order.orderStatus = this.newStatus;
         }
         
-        this.toast.success(`Order #${this.orderToUpdate.orderId} status updated to ${this.newStatus}`)
+        this.toast.success(`Order #${this.orderToUpdate.id} status updated to ${this.newStatus}`)
         this.isUpdating = false;
         this.closeStatusModal();
         

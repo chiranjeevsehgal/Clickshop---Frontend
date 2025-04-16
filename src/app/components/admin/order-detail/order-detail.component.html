@@ -155,13 +155,13 @@
                 <tr>
                   <td colspan="3" class="px-6 py-4 text-right text-sm font-medium text-gray-900">Subtotal:</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {{ getSubtotal() | currency:'INR' }}
+                    {{ order.order.subtotal | currency:'INR' }}
                   </td>
                 </tr>
-                <tr *ngIf="order.shippingFee">
+                <tr>
                   <td colspan="3" class="px-6 py-4 text-right text-sm font-medium text-gray-900">Shipping:</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {{ order.shippingFee | currency:'INR' }}
+                    {{ order.order.shipping | currency:'INR' }}
                   </td>
                 </tr>
                 <tr *ngIf="order.tax">
