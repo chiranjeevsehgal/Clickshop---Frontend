@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { OrderItem } from '../../../models/OrderItem';
 import { Order } from '../../../models/Order';
 import { OrdersService } from '../../../services/user/orders.service';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-orders',
@@ -114,5 +116,72 @@ export class OrdersComponent implements OnInit {
       style: 'currency', 
       currency: 'INR' 
     }).format(price);
+  }
+  
+  getInvoiceFormattedPrice(price: number): string {
+    if (isNaN(price) || price === null) return '₹0.00';
+  return price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  downloadInvoice(order: Order): void {
+    // Creating a new empty PDF document
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.setTextColor(0, 0, 255);
+    doc.text('ClickShop', 105, 15, { align: 'center' });
+    
+    // Add invoice title
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text('INVOICE', 105, 25, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.text(`Invoice #: INV-${order.orderId}`, 15, 40);
+    doc.text(`Order Date: ${this.getFormattedDate(order.orderDate)}`, 15, 45);
+    doc.text(`Payment Method: ${order.paymentMethod}`, 15, 55);
+    
+    // Customer info
+    doc.text('Bill To:', 140, 40);
+    doc.text(`Customer Name: ${order.items[0]?.userDetails?.name || 'N/A'}`, 140, 45);
+    doc.text(`Customer Contact: ${order.items[0]?.userDetails?.contact || 'N/A'}`, 140, 50);
+    doc.text(`Customer Email: ${order.items[0]?.userDetails?.email || 'N/A'}`, 140, 55);
+    doc.text(`Address: ${order.deliveryAddress}`, 140, 60);
+    
+    // Creating table for order items
+    const tableColumn = ["Item", "Price", "Quantity", "Total"];
+    const tableRows: any[] = [];
+    
+    // Adding order items to the table
+    order.items.forEach(item => {
+      const itemData = [
+        item.productName,
+        this.getInvoiceFormattedPrice(item.price),
+        item.quantity,
+        this.getInvoiceFormattedPrice(item.price * item.quantity)
+      ];
+      tableRows.push(itemData);
+    });
+    
+    // Integrating the table to the PDF
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 65,
+      theme: 'striped',
+      headStyles: { fillColor: [0, 51, 153] }
+    });
+    
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    doc.text(`Total Amount: ${this.getInvoiceFormattedPrice(order.totalAmount)}`, 120, finalY);
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.text('Thank you for shopping with ClickShop!', 105, finalY + 20, { align: 'center' });
+    doc.text('For any questions, please contact chiranjeevsehgal@gmail.com', 105, finalY + 25, { align: 'center' });
+    
+    // Saving the PDF
+    doc.save(`Invoice-${order.orderId}.pdf`);
   }
 }

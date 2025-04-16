@@ -6,4 +6,5 @@ export interface User {
     address?: string;
     createdAt?: string;
     username?: string;
+    contact?:string
 }

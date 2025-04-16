@@ -10,4 +10,5 @@ export interface Product {
     rating?: number;
     stock:number,
     inStock: boolean;
+    onSale?:boolean
   }
