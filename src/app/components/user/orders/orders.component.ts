@@ -33,22 +33,21 @@ export class OrdersComponent implements OnInit {
   
     this.orderService.getOrderHistory().subscribe({
       next: (orderItems) => {
-        // Group items by orderId
         const ordersMap = orderItems.reduce((map, item) => {
-          if (!map.has(item.orderId)) {
-            map.set(item.orderId, {
-              orderId: item.orderId,
+          console.log(orderItems);
+          if (!map.has(item.id)) {
+            map.set(item.id, {
+              orderId: item.id,
               orderDate: item.orderDate,
               totalAmount: 0,
-              status: item.status || 'Ordered', // Default to 'Ordered' if status is undefined
-              paymentMethod: item.paymentMethod || 'Card', // Default payment method
-              deliveryAddress: item.deliveryAddress || 'Not provided', // Default address
+              status: item.orderStatus || 'Ordered',
+              paymentMethod: item.paymentMethod || 'Razorpay',
+              deliveryAddress: item?.userDetails?.address || 'Not provided', 
               items: []
             });
           }
-  
-          const order = map.get(item.orderId)!;
-          // Extract product name from the product object if needed
+          
+          const order = map.get(item.id)!;
           const productName = item.product?.name || 'Unknown Product';
           const price = item.product?.price || 0;
           
@@ -58,15 +57,12 @@ export class OrdersComponent implements OnInit {
             price: price
           });
           
-          // Calculate total amount carefully to avoid NaN
           order.totalAmount += (price * item.quantity) || 0;
           return map;
         }, new Map<number, Order>());
   
         this.orders = Array.from(ordersMap.values())
           .sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
-        
-        console.log('Processed orders:', this.orders);
         
         this.isLoading = false;
       },

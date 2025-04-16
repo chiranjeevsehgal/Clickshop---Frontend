@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CartItem } from '../../../models/CartItems';
 import { Router } from '@angular/router';
 import { CartService } from '../../../services/cart/get-cart.service';
+import { RazorpayService } from '../../../services/user/razorpay.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 @Component({
   selector: 'app-cart-items',
@@ -19,12 +21,17 @@ export class CartComponent implements OnInit {
   discountApplied: boolean = false;
   discountAmount: number = 0;
   processingOrder: boolean = false;
+  customerInfo: any = {};
+
 
   placeholderProduct: string = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi5YNRPU4910yPsW1yobc1J7of1kMM-pww1Qf5lkpKePvG1-3GeRFJPh0U9w0FLoeojueyp4HtPxcqWkGJOudVgEv3tpEnJQM9-Ia-eemENMJTFpTFm6WeZiiB2nBRDIwl9PeRGvsjEJTI/s1600/placeholder-image.jpg'
 
   constructor(
     private cartService: CartService,
-    private router: Router
+    private router: Router,
+    private razorpayService: RazorpayService,
+    private toast: HotToastService,
+
   ) {}
 
   ngOnInit(): void {
@@ -97,11 +104,14 @@ export class CartComponent implements OnInit {
   }
 
   processCheckout(): void {
-    if (this.cartItems.length === 0) return;
+    if (this.cartItems.length === 0) {
+      this.toast.error('Your cart is empty');
+      return;
+    }
 
     this.processingOrder = true;
 
-    const order = {
+    const orderData = {
       items: this.cartItems,
       subtotal: this.cartTotal,
       shipping: this.shippingCost,
@@ -109,24 +119,118 @@ export class CartComponent implements OnInit {
       total: this.cartTotal + this.shippingCost - this.discountAmount
     };
 
-    this.cartService.placeOrder(order).subscribe({
-      next: (response) => {
-        this.cartService.clearCart().subscribe(() => {
-          this.processingOrder = false;
-          this.router.navigate(['/checkout/success'], {
-            state: { orderDetails: response }
-          });
-        });
+    // Create an order in the backend first
+    this.cartService.createOrder(orderData).subscribe({
+      next: (orderResponse) => {
+        console.log("Initiate payment");
+        console.log(orderResponse);
+        this.initiatePayment(orderResponse);
+        
+        
       },
       error: (err) => {
-        console.error('Error processing order:', err);
+        console.error('Error creating order:', err);
         this.processingOrder = false;
-        alert('Unable to process your order. Please try again.');
+        this.toast.error('Unable to process your order. Please try again.');
       }
     });
   }
 
+  initiatePayment(orderData: any): void {
+    
+    const options = {
+      key: 'rzp_test_nszEMOVRLAZUFz',
+      amount: Math.round(orderData.total), // Amount in paisa
+      currency: 'INR',
+      name: 'ClickShop',
+      description: 'Purchase from ClickShop',
+      order_id: orderData.razorpayOrderId,
+      prefill: {
+        name: orderData.user.name,
+        email: orderData.user.email,
+        contact: orderData.user.phone
+      },
+      notes: {
+        address: 'Chiranjeev Sehgal'
+      },
+      theme: {
+        color: '#4f46e5'
+      },
+      handler: (response: any) => {
+        this.handlePaymentSuccess(response, orderData);
+      }
+    };
+
+    // Load and open Razorpay
+    this.loadRazorpayScript().then(() => {
+      this.razorpayService.initPayment(options)
+        .catch((error) => {
+          console.error('Payment failed:', error);
+          this.processingOrder = false;
+          this.toast.error('Payment failed. Please try again.');
+        });
+    });
+  }
+  
+
+  handlePaymentSuccess(response: any, orderData: any): void {
+    // To verify payment
+    
+    const paymentData = {
+      razorpayPaymentId: response.razorpay_payment_id,
+      razorpayOrderId: response.razorpay_order_id,
+      razorpaySignature: response.razorpay_signature,
+      orderId: orderData.orderId
+    };
+    
+
+    this.razorpayService.verifyPayment(paymentData).subscribe({
+      next: (verificationResponse) => {
+        
+        this.cartService.saveOrder({
+          ...orderData,
+          paymentId: response.razorpay_payment_id,
+          paymentStatus: 'COMPLETED'
+        }).subscribe({
+          next: (finalOrderResponse) => {
+            this.cartService.clearCart().subscribe(() => {
+              this.processingOrder = false;
+              this.toast.success('Payment successful! Order placed.');
+              this.router.navigate(['/orders'], {
+                state: { orderDetails: finalOrderResponse }
+              });
+            });
+          },
+          error: (err) => {
+            console.error('Error saving order after payment:', err);
+            this.processingOrder = false;
+            this.toast.error('Your payment was successful but we had trouble saving your order. Please contact support with your payment ID: ' + response.razorpay_payment_id);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Payment verification failed:', err);
+        this.processingOrder = false;
+        this.toast.error('Payment verification failed. Please contact support with your payment ID: ' + response.razorpay_payment_id);
+      }
+    });
+  }
+
+  loadRazorpayScript(): Promise<boolean> {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => {
+        this.toast.error('Failed to load payment gateway. Please try again.');
+        this.processingOrder = false;
+        resolve(false);
+      };
+      document.body.appendChild(script);
+    });
+  }
   getFormattedPrice(price: number): string {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'INR' }).format(price);
   }
+
 }

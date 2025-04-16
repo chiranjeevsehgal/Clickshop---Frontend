@@ -148,28 +148,19 @@
               </div>
               
               <button 
-                (click)="processCheckout()" 
-                [disabled]="processingOrder || cartItems.length === 0"
-                class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition duration-300 flex items-center justify-center disabled:bg-blue-300"
-              >
-                <span *ngIf="!processingOrder">Proceed to Checkout</span>
-                <span *ngIf="processingOrder">Processing...</span>
-                <svg *ngIf="!processingOrder" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-                <div *ngIf="processingOrder" class="ml-2 animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-              </button>
-              
-              <!-- Payment Methods -->
-              <div class="mt-6">
-                <p class="text-xs text-gray-500 mb-2 text-center">We accept:</p>
-                <div class="flex justify-center space-x-2">
-                  <div class="w-10 h-6 bg-gray-200 rounded"></div>
-                  <div class="w-10 h-6 bg-gray-200 rounded"></div>
-                  <div class="w-10 h-6 bg-gray-200 rounded"></div>
-                  <div class="w-10 h-6 bg-gray-200 rounded"></div>
-                </div>
+              (click)="processCheckout()" 
+              class="w-full py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center"
+              [disabled]="processingOrder">
+              <span *ngIf="!processingOrder">Proceed to Payment</span>
+              <div *ngIf="processingOrder" class="flex items-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                Processing...
               </div>
+            </button>
+            
+            <div class="mt-4 flex items-center justify-center">
+              <img src="https://cdn.razorpay.com/static/assets/merchant-badge/badge-dark.png" alt="Razorpay" class="h-6">
+            </div>
             </div>
           </div>
         </div>

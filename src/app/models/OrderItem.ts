@@ -1,15 +1,17 @@
 import { Product } from "./Product";
+import { User } from "./User";
 
 export interface OrderItem {
-  orderId: number;
+  id: number;
   orderDate: string;
   quantity: number;
   price: number;
   productName?: string;
-  status?: string;
+  orderStatus?: string;
   paymentMethod?: string;
   deliveryAddress?: string;
   product?: Product;
   formattedDate?: string | null;
   totalPrice?: number;
+  userDetails?: User
   }

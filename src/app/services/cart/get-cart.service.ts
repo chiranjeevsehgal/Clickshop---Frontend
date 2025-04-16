@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CartItem } from '../../models/CartItems';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -36,10 +36,38 @@ export class CartService {
   }
 
   clearCart(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/api/cart/clear`, { withCredentials: true });
+    return this.http.delete(`${this.apiUrl}/cart/clear`, { withCredentials: true });
   }
 
   placeOrder(order: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/api/orders`, order, { withCredentials: true });
+  }
+  createOrder(orderData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/payments/create-order`, orderData, { 
+      withCredentials: true 
+    }).pipe(
+      switchMap(orderResponse => {
+        const userId = orderResponse.userId;
+  
+        return this.http.get<any>(`${this.apiUrl}/users/${userId}`).pipe(
+          map(user => {
+            return {
+              ...orderResponse,
+              user
+            };
+          })
+        );
+      })
+    );
+  }
+  
+
+  // Save completed order after successful payment
+  saveOrder(orderData: any): Observable<any> {
+    console.log(orderData);
+    
+    return this.http.post(`${this.apiUrl}/orders/save`, orderData, { 
+      withCredentials: true 
+    });
   }
 }
