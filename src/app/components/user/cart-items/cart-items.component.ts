@@ -122,9 +122,8 @@ export class CartComponent implements OnInit {
     // Create an order in the backend first
     this.cartService.createOrder(orderData).subscribe({
       next: (orderResponse) => {
-        console.log("Initiate payment");
-        console.log(orderResponse);
-        this.initiatePayment(orderResponse);
+        
+        this.initiatePayment(orderResponse, orderData);
         
         
       },
@@ -136,7 +135,8 @@ export class CartComponent implements OnInit {
     });
   }
 
-  initiatePayment(orderData: any): void {
+  initiatePayment(orderData: any, originalData: any): void {
+    
     
     const options = {
       key: 'rzp_test_nszEMOVRLAZUFz',
@@ -157,7 +157,7 @@ export class CartComponent implements OnInit {
         color: '#4f46e5'
       },
       handler: (response: any) => {
-        this.handlePaymentSuccess(response, orderData);
+        this.handlePaymentSuccess(response, orderData, originalData);
       }
     };
 
@@ -173,7 +173,7 @@ export class CartComponent implements OnInit {
   }
   
 
-  handlePaymentSuccess(response: any, orderData: any): void {
+  handlePaymentSuccess(response: any, orderData: any, originalData: any): void {
     // To verify payment
     
     const paymentData = {
@@ -190,8 +190,8 @@ export class CartComponent implements OnInit {
         this.cartService.saveOrder({
           ...orderData,
           paymentId: response.razorpay_payment_id,
-          paymentStatus: 'COMPLETED'
-        }).subscribe({
+          paymentStatus: 'COMPLETED', 
+        }, originalData).subscribe({
           next: (finalOrderResponse) => {
             this.cartService.clearCart().subscribe(() => {
               this.processingOrder = false;

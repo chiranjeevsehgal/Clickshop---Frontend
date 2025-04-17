@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CartItem } from '../../models/CartItems';
-import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, switchMap, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -63,11 +63,44 @@ export class CartService {
   
 
   // Save completed order after successful payment
-  saveOrder(orderData: any): Observable<any> {
-    console.log(orderData);
-    
+  saveOrder(orderData: any, originalData: any): Observable<any> {
+  
     return this.http.post(`${this.apiUrl}/orders/save`, orderData, { 
       withCredentials: true 
-    });
+    }).pipe(
+      tap((orderResponse: any) => {
+        // After order is saved successfully, send email notifications
+        
+        if (orderResponse && orderResponse.orderId) {
+          
+          const emailPayload = {
+            ...orderResponse,    
+            ...orderData,        
+            ...originalData,     
+            orderId: orderResponse.orderId 
+          };
+          
+          // Send customer email notification
+          this.http.post(`${this.apiUrl}/email/send-customer-confirmation`, emailPayload, {
+            withCredentials: true
+          }).subscribe({
+            next: (emailResponse) => console.log('Customer email notification sent successfully', emailResponse),
+            error: (error) => console.error('Failed to send customer email notification', error)
+          });
+          
+          // Send admin email notification
+          this.http.post(`${this.apiUrl}/email/send-admin-notification`, emailPayload, {
+            withCredentials: true
+          }).subscribe({
+            next: (emailResponse) => console.log('Admin email notification sent successfully', emailResponse),
+            error: (error) => console.error('Failed to send admin email notification', error)
+          });
+        }
+      }),
+      catchError(error => {
+        console.error('Error saving order:', error);
+        throw error;
+      })
+    );
   }
 }
