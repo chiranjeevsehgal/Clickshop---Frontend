@@ -64,7 +64,8 @@ export class CartService {
 
   // Save completed order after successful payment
   saveOrder(orderData: any, originalData: any): Observable<any> {
-  
+    
+    console.log(orderData);
     return this.http.post(`${this.apiUrl}/orders/save`, orderData, { 
       withCredentials: true 
     }).pipe(

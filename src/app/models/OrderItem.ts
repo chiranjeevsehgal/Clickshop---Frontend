@@ -13,5 +13,13 @@ export interface OrderItem {
   product?: Product;
   formattedDate?: string | null;
   totalPrice?: number;
-  userDetails?: User
+  userDetails?: User;
+  paymentStatus?: string;
+  paymentId?: string;
+  discount: number;
+  shipping: number;
+  subtotal: number;
+  
+
+
   }
