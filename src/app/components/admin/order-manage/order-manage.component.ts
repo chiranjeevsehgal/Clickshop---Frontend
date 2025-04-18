@@ -188,15 +188,17 @@ export class OrderManageComponent {
     if (!this.orderToCancel) return;
     
     this.isCancelling = true;
+    console.log(this.orderToCancel);
     
-    this.orderService.cancelOrder(this.orderToCancel.orderId).subscribe({
+    this.orderService.cancelOrder(this.orderToCancel.id).subscribe({
       next: () => {
         // Update the order status in the local array
-        const order = this.orders.find(o => o.orderId === this.orderToCancel.orderId);
+        const order = this.orders.find(o => o.id === this.orderToCancel.id);
+        
         if (order) {
           order.orderStatus = 'CANCELLED';
         }
-        this.toast.warning(`Order #${this.orderToCancel.orderId} has been cancelled`)
+        this.toast.warning(`Order #${this.orderToCancel.id} has been cancelled`)
         this.isCancelling = false;
         this.closeCancelModal();
         

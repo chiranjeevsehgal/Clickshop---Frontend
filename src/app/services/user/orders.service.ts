@@ -18,24 +18,36 @@ export class OrdersService {
     private authService: AuthService
   ) { }
 
-  getOrderHistory(): Observable<OrderItem[]> {
+  cancelOrder(orderId: number): Observable<any> {
+    console.log(orderId);
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
     
+    return this.http.put(`${this.apiUrl}/orders/${orderId}/cancel`, {}, {
+      headers,
+      withCredentials: true
+    });
+  }
+
+  getOrderHistory(): Observable<OrderItem[]> {
+
     const headers = this.token
       ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
       : new HttpHeaders();
 
-    return this.http.get<OrderItem[]>(`${this.apiUrl}/users/vieworders`, { headers,withCredentials: true })
+    return this.http.get<OrderItem[]>(`${this.apiUrl}/users/vieworders`, { headers, withCredentials: true })
       .pipe(
         switchMap(orders => {
           if (!orders || orders.length === 0) {
             return of([]);
           }
-          
+
           const userId = this.authService.getUserId();
           if (!userId) {
-            return of(orders); 
+            return of(orders);
           }
-          
+
           return this.http.get<User>(`${this.apiUrl}/users/${userId}`, { headers, withCredentials: true })
             .pipe(
               map(user => {

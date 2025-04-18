@@ -7,9 +7,9 @@ import { ProductDetailComponent } from './components/user/product-detail/product
 import { CartComponent } from './components/user/cart-items/cart-items.component';
 import { OrdersComponent } from './components/user/orders/orders.component';
 import { ProfileComponent } from './components/user/profile/profile.component';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from './guards/auth.guard';
 import { ViewUsersComponent } from './components/admin/view-users/view-users.component';
-import { AdminGuard } from './admin.guard';
+import { AdminGuard } from './guards/admin.guard';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard/admin-dashboard.component';
 import { ViewAdminsComponent } from './components/admin/view-admins/view-admins.component';
 import { ViewProductsComponent } from './components/admin/view-products/view-products.component';

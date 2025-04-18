@@ -13,10 +13,10 @@ export class CartService {
 
 
   private apiUrl = 'http://localhost:8081';
-  
+
   private token = localStorage.getItem('authToken');
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   refreshCartCount(): void {
     this.getCartItems().subscribe(items => {
@@ -30,7 +30,7 @@ export class CartService {
       ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
       : new HttpHeaders();
 
-    return this.http.get<CartItem[]>(`${this.apiUrl}/users/cartitems`, { headers,withCredentials: true });
+    return this.http.get<CartItem[]>(`${this.apiUrl}/users/cartitems`, { headers, withCredentials: true });
   }
 
   updateQuantity(itemId: number, quantity: number): Observable<any> {
@@ -46,7 +46,7 @@ export class CartService {
       ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
       : new HttpHeaders();
 
-    return this.http.delete(`${this.apiUrl}/cart/remove/${itemId}`, { headers,withCredentials: true });
+    return this.http.delete(`${this.apiUrl}/cart/remove/${itemId}`, { headers, withCredentials: true });
   }
 
   clearCart(): Observable<any> {
@@ -65,12 +65,12 @@ export class CartService {
     return this.http.post(`${this.apiUrl}/api/orders`, order, { headers, withCredentials: true });
   }
   createOrder(orderData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/payments/create-order`, orderData, { 
-      withCredentials: true 
+    return this.http.post<any>(`${this.apiUrl}/payments/create-order`, orderData, {
+      withCredentials: true
     }).pipe(
       switchMap(orderResponse => {
         const userId = orderResponse.userId;
-  
+
         return this.http.get<any>(`${this.apiUrl}/users/${userId}`).pipe(
           map(user => {
             return {
@@ -82,27 +82,41 @@ export class CartService {
       })
     );
   }
-  
+
 
   // Save completed order after successful payment
   saveOrder(orderData: any, originalData: any): Observable<any> {
-    
-    console.log(orderData);
-    return this.http.post(`${this.apiUrl}/orders/save`, orderData, { 
-      withCredentials: true 
+
+    console.log(originalData);
+    return this.http.post(`${this.apiUrl}/orders/save`, orderData, {
+      withCredentials: true
     }).pipe(
       tap((orderResponse: any) => {
-        // After order is saved successfully, send email notifications
-        
+
         if (orderResponse && orderResponse.orderId) {
           
+          // Reduce stock for each product
+          if (originalData?.items && originalData.items.length > 0) {
+            originalData.items.forEach((item: {productId: number, quantity: number}) => {
+              this.http.post(`${this.apiUrl}/product/${item.productId}/reduce-stock`, {
+                quantity: item.quantity
+              }, {
+                withCredentials: true
+              }).subscribe({
+                next: (stockResponse) => console.log(`Stock updated for product ${item.productId}`, stockResponse),
+                error: (error) => console.error(`Failed to update stock for product ${item.productId}`, error)
+              });
+            });
+          }
+
+        // Prepare data for emails
           const emailPayload = {
-            ...orderResponse,    
-            ...orderData,        
-            ...originalData,     
-            orderId: orderResponse.orderId 
+            ...orderResponse,
+            ...orderData,
+            ...originalData,
+            orderId: orderResponse.orderId
           };
-          
+
           // Send customer email notification
           this.http.post(`${this.apiUrl}/email/send-customer-confirmation`, emailPayload, {
             withCredentials: true
@@ -110,7 +124,7 @@ export class CartService {
             next: (emailResponse) => console.log('Customer email notification sent successfully', emailResponse),
             error: (error) => console.error('Failed to send customer email notification', error)
           });
-          
+
           // Send admin email notification
           this.http.post(`${this.apiUrl}/email/send-admin-notification`, emailPayload, {
             withCredentials: true
