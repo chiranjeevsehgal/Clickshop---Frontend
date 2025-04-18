@@ -19,10 +19,12 @@ import { OrderDetailComponent } from './components/admin/order-detail/order-deta
 import { WishlistComponent } from './components/user/wishlist/wishlist.component';
 import { RoleRedirectComponent } from './components/util/role-redirect/role-redirect.component';
 import { userGuard } from './guards/user.guard';
+import { TokenInterceptorComponent } from './components/util/token-interceptor/token-interceptor.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', component: RoleRedirectComponent },
+  { path: 'intercept', component: TokenInterceptorComponent },
   { path: 'register', component: RegisterComponent,},
   { path: 'products', component: ProductsComponent, canActivate: [userGuard]},
   { path: 'product/:id', component: ProductDetailComponent, canActivate: [userGuard] },

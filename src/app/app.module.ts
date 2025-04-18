@@ -30,6 +30,7 @@ import { WishlistComponent } from './components/user/wishlist/wishlist.component
 import { RoleRedirectComponent } from './components/util/role-redirect/role-redirect.component';
 import { GeminiAssistantComponent } from './components/util/gemini-assistant/gemini-assistant.component';
 import { LucideAngularModule, Bot } from 'lucide-angular';
+import { TokenInterceptorComponent } from './components/util/token-interceptor/token-interceptor.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { LucideAngularModule, Bot } from 'lucide-angular';
     WishlistComponent,
     RoleRedirectComponent,
     GeminiAssistantComponent,
+    TokenInterceptorComponent,
 
   ],
   imports: [

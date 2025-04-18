@@ -35,7 +35,6 @@ export class LoginComponent implements OnInit {
       rememberMe: [false]
     });
 
-    // Get return url from route parameters or default to '/products'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
   }
 
@@ -49,7 +48,7 @@ export class LoginComponent implements OnInit {
       if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
         this.router.navigate(['/admin/dashboard']);
       } else {
-        this.router.navigate(['/products']); // or wherever regular users go
+        this.router.navigate(['/products']);
       }
     }
     
@@ -105,6 +104,17 @@ export class LoginComponent implements OnInit {
       },
       complete: () => {
         this.isSubmitting = false;
+      }
+    });
+  }
+  
+  initiateGoogleLogin(): void {
+    this.authService.getGoogleAuthUrl().subscribe({
+      next: (response: any) => {
+        window.location.href = response.authUrl;
+      },
+      error: (error) => {
+        console.error('Failed to get Google auth URL', error);
       }
     });
   }
