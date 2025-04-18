@@ -72,7 +72,7 @@ export class ViewAdminsComponent implements OnInit {
   demoteToUser(admin: any): void {
     this.adminService.demoteToUser(admin.username).subscribe({
       next: () => {
-        this.successMessage = `Admin ${admin.name} has been removed successfully`;
+        this.successMessage = `Admin ${admin.name} has been demoted successfully`;
         
         // Remove admin from the list
         this.admins = this.admins.filter(a => a.id !== admin.id);
@@ -84,8 +84,8 @@ export class ViewAdminsComponent implements OnInit {
         }, 3000);
       },
       error: (error) => {
-        console.error('Error removing admin:', error);
-        this.errorMessage = 'Failed to remove admin. Please try again.';
+        console.error('Error demoting admin:', error);
+        this.errorMessage = 'Failed to demote admin. Please try again.';
         
         // Clear error message after 3 seconds
         setTimeout(() => {

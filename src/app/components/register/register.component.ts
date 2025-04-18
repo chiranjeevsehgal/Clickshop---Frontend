@@ -1,5 +1,5 @@
 // register.component.ts
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/authService/auth.service';
@@ -10,7 +10,7 @@ import { AuthService } from '../../services/authService/auth.service';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent {
+export class RegisterComponent  implements OnInit{
   registerForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
@@ -47,6 +47,22 @@ export class RegisterComponent {
     }, {
       validators: this.passwordMatchValidator
     });
+  }
+
+  ngOnInit(): void {
+    this.loginCheck();
+  }
+  
+  loginCheck(){
+    if (this.authService.isLoggedIn()) {
+      const role = this.authService.getUserRole();
+      if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
+        this.router.navigate(['/admin/dashboard']);
+      } else {
+        this.router.navigate(['/products']); // or wherever regular users go
+      }
+    }
+    
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -104,10 +120,10 @@ export class RegisterComponent {
     if (this.registerForm.invalid) {
       return;
     }
-
+  
     this.isSubmitting = true;
     this.errorMessage = '';
-
+  
     const registerData = {
       name: this.registerForm.get('name')?.value,
       email: this.registerForm.get('email')?.value,
@@ -122,24 +138,35 @@ export class RegisterComponent {
         zipCode: this.registerForm.get('zipCode')?.value
       }
     };
-
+  
     this.authService.register(registerData).subscribe({
       next: (response: any) => {
+        // Store the JWT token
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+          
+          // Store user info if needed
+          if (response.user) {
+            localStorage.setItem('user', JSON.stringify(response.user));
+          }
+        }
+        
         // Handle successful registration
         this.router.navigate(['/login'], { 
           queryParams: { registered: 'true' } 
         });
       },
       error: (error) => {
+        console.log(error);
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+        this.errorMessage = error.error || 'Registration failed. Please try again.';
       },
       complete: () => {
         this.isSubmitting = false;
       }
     });
   }
-  
+   
   getProgressPercentage(): number {
     return ((this.currentStep - 1) / (this.totalSteps - 1)) * 100;
   }

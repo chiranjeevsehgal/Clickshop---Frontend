@@ -29,7 +29,7 @@ export class AdminHeaderComponent implements OnInit {
       next: () => {
         this.router.navigate(['/login']);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Logout error:', error);
         // Even if there's an error, navigate to login
         this.router.navigate(['/login']);

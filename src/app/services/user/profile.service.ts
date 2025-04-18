@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../../models/User';
@@ -9,25 +9,40 @@ import { User } from '../../models/User';
 export class ProfileService {
   private apiUrl = 'http://localhost:8081/users';
 
+  private token = localStorage.getItem('authToken');
+
   constructor(private http: HttpClient) {}
 
   getUserProfile(): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/profile`, { withCredentials: true });
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
+    return this.http.get<User>(`${this.apiUrl}/profile`, { headers, withCredentials: true });
   }
 
   updateProfile(userData: any): Observable<any> {
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
     return this.http.put<any>(`${this.apiUrl}/updateprofile`, userData, {
+      headers,
       withCredentials: true
     });
   }
   
 
   changePassword(oldPassword: string, newPassword: string): Observable<string> {
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
     let params = new HttpParams()
       .set('oldPassword', oldPassword)
       .set('newPassword', newPassword);
     
-    return this.http.put<string>(`${this.apiUrl}/changepassword`, null, { params, withCredentials: true 
+    return this.http.put<string>(`${this.apiUrl}/changepassword`, null, { params,headers, withCredentials: true 
     });
   }
 }

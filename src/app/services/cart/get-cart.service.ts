@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CartItem } from '../../models/CartItems';
 import { BehaviorSubject, catchError, map, Observable, switchMap, tap } from 'rxjs';
 
@@ -13,6 +13,8 @@ export class CartService {
 
 
   private apiUrl = 'http://localhost:8081';
+  
+  private token = localStorage.getItem('authToken');
 
   constructor(private http: HttpClient) {}
 
@@ -24,23 +26,43 @@ export class CartService {
   }
 
   getCartItems(): Observable<CartItem[]> {
-    return this.http.get<CartItem[]>(`${this.apiUrl}/users/cartitems`, { withCredentials: true });
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
+    return this.http.get<CartItem[]>(`${this.apiUrl}/users/cartitems`, { headers,withCredentials: true });
   }
 
   updateQuantity(itemId: number, quantity: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/cart/update/${itemId}`, { quantity }, { withCredentials: true });
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
+    return this.http.put(`${this.apiUrl}/cart/update/${itemId}`, { quantity }, { headers, withCredentials: true });
   }
 
   removeItem(itemId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/cart/remove/${itemId}`, { withCredentials: true });
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
+    return this.http.delete(`${this.apiUrl}/cart/remove/${itemId}`, { headers,withCredentials: true });
   }
 
   clearCart(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/cart/clear`, { withCredentials: true });
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
+    return this.http.delete(`${this.apiUrl}/cart/clear`, { headers, withCredentials: true });
   }
 
   placeOrder(order: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/api/orders`, order, { withCredentials: true });
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
+    return this.http.post(`${this.apiUrl}/api/orders`, order, { headers, withCredentials: true });
   }
   createOrder(orderData: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/payments/create-order`, orderData, { 

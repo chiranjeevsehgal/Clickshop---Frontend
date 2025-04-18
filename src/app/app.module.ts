@@ -27,6 +27,7 @@ import { OrderManageComponent } from './components/admin/order-manage/order-mana
 import { OrderDetailComponent } from './components/admin/order-detail/order-detail.component';
 import { provideHotToastConfig } from '@ngxpert/hot-toast';
 import { WishlistComponent } from './components/user/wishlist/wishlist.component';
+import { RoleRedirectComponent } from './components/util/role-redirect/role-redirect.component';
 
 
 @NgModule({
@@ -51,6 +52,7 @@ import { WishlistComponent } from './components/user/wishlist/wishlist.component
     OrderManageComponent,
     OrderDetailComponent,
     WishlistComponent,
+    RoleRedirectComponent,
 
   ],
   imports: [

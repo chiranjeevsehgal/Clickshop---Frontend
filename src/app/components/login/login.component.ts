@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/authService/auth.service';
@@ -11,12 +11,16 @@ import { HotToastService } from '@ngxpert/hot-toast';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
   showPassword = false;
   returnUrl: string = '/products';
+
+  ngOnInit(): void {
+    this.loginCheck();
+  }
 
   constructor(
     private formBuilder: FormBuilder,
@@ -39,6 +43,18 @@ export class LoginComponent {
     this.showPassword = !this.showPassword;
   }
 
+  loginCheck(){
+    if (this.authService.isLoggedIn()) {
+      const role = this.authService.getUserRole();
+      if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
+        this.router.navigate(['/admin/dashboard']);
+      } else {
+        this.router.navigate(['/products']); // or wherever regular users go
+      }
+    }
+    
+  }
+
   onSubmit() {
     if (this.loginForm.invalid) {
       return;
@@ -50,7 +66,12 @@ export class LoginComponent {
     const username = this.loginForm.get('username')?.value;
     const password = this.loginForm.get('password')?.value;
 
-    this.authService.login(username, password).subscribe({
+    const loginData = {
+      username: username,
+      password: password
+    };
+
+    this.authService.login(loginData).subscribe({
       next: (response: any) => {
         // Handle successful login
         console.log('Login success:', response);
@@ -66,11 +87,13 @@ export class LoginComponent {
         }
         
         // Navigate to the return URL or dashboard
+        console.log(response.role === 'ADMIN' || response.role === 'SUPER_ADMIN');
         
-        if (response.role === 'ADMIN') {
+        if (response.role === 'ADMIN' || response.role === 'SUPER_ADMIN') {
+          console.log("true con");
           this.router.navigate(['/admin/dashboard']);
         } else {
-          // Navigate to the return URL or products page for regular users
+          
           this.router.navigate([this.returnUrl]);
         }
       },

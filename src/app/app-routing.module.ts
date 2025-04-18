@@ -17,22 +17,24 @@ import { EditProductsComponent } from './components/admin/edit-products/edit-pro
 import { OrderManageComponent } from './components/admin/order-manage/order-manage.component';
 import { OrderDetailComponent } from './components/admin/order-detail/order-detail.component';
 import { WishlistComponent } from './components/user/wishlist/wishlist.component';
+import { RoleRedirectComponent } from './components/util/role-redirect/role-redirect.component';
+import { userGuard } from './guards/user.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: '', redirectTo: '/products', pathMatch: 'full' },
+  { path: '', component: RoleRedirectComponent },
   { path: 'register', component: RegisterComponent,},
-  { path: 'products', component: ProductsComponent},
-  { path: 'product/:id', component: ProductDetailComponent },
-  { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
-  { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-  { path: 'wishlist', component: WishlistComponent, canActivate: [AuthGuard] },
+  { path: 'products', component: ProductsComponent, canActivate: [userGuard]},
+  { path: 'product/:id', component: ProductDetailComponent, canActivate: [userGuard] },
+  { path: 'cart', component: CartComponent, canActivate: [AuthGuard, userGuard] },
+  { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard, userGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, userGuard] },
+  { path: 'wishlist', component: WishlistComponent, canActivate: [AuthGuard, userGuard] },
   
   // Admin route
   {
     path: 'admin',
-    canActivate: [AdminGuard],
+    canActivate: [AuthGuard, AdminGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: AdminDashboardComponent },
