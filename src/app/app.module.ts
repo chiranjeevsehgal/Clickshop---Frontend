@@ -22,7 +22,7 @@ import { AdminHeaderComponent } from './components/reusable/admin-header/admin-h
 import { AdminLayoutComponent } from './components/reusable/admin-layout/admin-layout.component';
 import { ViewAdminsComponent } from './components/admin/view-admins/view-admins.component';
 import { ViewProductsComponent } from './components/admin/view-products/view-products.component';
-import { EditProductsComponent } from './components/admin/edit-products/edit-products.component';
+import { EditProductsComponent } from './components/admin/manage-products/edit-products.component';
 import { OrderManageComponent } from './components/admin/order-manage/order-manage.component';
 import { OrderDetailComponent } from './components/admin/order-detail/order-detail.component';
 import { provideHotToastConfig } from '@ngxpert/hot-toast';

@@ -13,7 +13,7 @@ import { AdminGuard } from './admin.guard';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard/admin-dashboard.component';
 import { ViewAdminsComponent } from './components/admin/view-admins/view-admins.component';
 import { ViewProductsComponent } from './components/admin/view-products/view-products.component';
-import { EditProductsComponent } from './components/admin/edit-products/edit-products.component';
+import { EditProductsComponent } from './components/admin/manage-products/edit-products.component';
 import { OrderManageComponent } from './components/admin/order-manage/order-manage.component';
 import { OrderDetailComponent } from './components/admin/order-detail/order-detail.component';
 import { WishlistComponent } from './components/user/wishlist/wishlist.component';

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminServiceService } from '../../../services/admin/admin-service.service';
+import { GeminiService } from '../../../services/util/gemini.service';
 
 @Component({
   selector: 'app-edit-products',
@@ -13,6 +14,7 @@ export class EditProductsComponent {
   productId: number = 0;
   isNewProduct: boolean = true;
   isLoading: boolean = false;
+  isGeneratingDescription: boolean = false;
   isSubmitting: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
@@ -23,7 +25,8 @@ export class EditProductsComponent {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private adminService: AdminServiceService
+    private adminService: AdminServiceService,
+    private geminiService: GeminiService
   ) {
     // Initialize form with empty values and validators
     this.productForm = this.fb.group({
@@ -152,4 +155,62 @@ export class EditProductsComponent {
   goBack(): void {
     this.router.navigate(['/admin/viewproducts']);
   }
+  
+  onDescriptionGenerated(description: string): void {
+    this.productForm.patchValue({ description });
+    this.productForm.get('description')?.markAsTouched();
+  }
+
+  generateDescriptionWithAI(): void {
+    const name = this.productForm.get('name')?.value;
+    const category = this.productForm.get('category')?.value;
+    const currentDescription = this.productForm.get('description')?.value || '';
+    
+    if (!name) {
+      // Optionally show an error if no product name is provided
+      this.errorMessage = 'Please enter a product name before generating a description';
+      setTimeout(() => this.errorMessage = '', 3000);
+      return;
+    }
+    
+    this.isGeneratingDescription = true;
+    
+    // Create a prompt that includes product name, category, and any existing description content
+    let enhancedPrompt = 'Generate a detailed product description for e-commerce';
+    
+    enhancedPrompt += ` for a product named "${name}"`;
+    
+    if (category) {
+      enhancedPrompt += ` in the category "${category}"`;
+    }
+    
+    if (currentDescription.trim()) {
+      enhancedPrompt += `. Use these details as reference: ${currentDescription}`;
+    }
+    
+    // Add specific instructions for the AI
+    enhancedPrompt += `. The description should be:
+    - Around 100-150 words
+    - Highlight key features and benefits
+    - Use persuasive language appropriate for e-commerce
+    - Include relevant details for this type of product
+    - Avoid placeholder text or generic statements
+    - Write in a professional tone`;
+    
+    this.geminiService.getAiResponse(enhancedPrompt)
+      .then(response => {
+        // Clean up the response (remove quotes if present)
+        const cleanedResponse = response.replace(/^["']|["']$/g, '');
+        // Update the description field
+        this.productForm.patchValue({ description: cleanedResponse });
+        this.productForm.get('description')?.markAsTouched();
+        this.isGeneratingDescription = false;
+      })
+      .catch(error => {
+        console.error('Error generating description:', error);
+        this.errorMessage = 'Failed to generate description. Please try again.';
+        this.isGeneratingDescription = false;
+      });
+  }
+
 }
