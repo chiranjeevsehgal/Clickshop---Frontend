@@ -28,7 +28,8 @@ import { OrderDetailComponent } from './components/admin/order-detail/order-deta
 import { provideHotToastConfig } from '@ngxpert/hot-toast';
 import { WishlistComponent } from './components/user/wishlist/wishlist.component';
 import { RoleRedirectComponent } from './components/util/role-redirect/role-redirect.component';
-
+import { GeminiAssistantComponent } from './components/util/gemini-assistant/gemini-assistant.component';
+import { LucideAngularModule, Bot } from 'lucide-angular';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { RoleRedirectComponent } from './components/util/role-redirect/role-redi
     OrderDetailComponent,
     WishlistComponent,
     RoleRedirectComponent,
+    GeminiAssistantComponent,
 
   ],
   imports: [
@@ -61,6 +63,7 @@ import { RoleRedirectComponent } from './components/util/role-redirect/role-redi
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    LucideAngularModule.pick({Bot}),
   ],
   providers: [
     {

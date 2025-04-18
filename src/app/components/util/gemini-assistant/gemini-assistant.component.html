@@ -1,0 +1,81 @@
+<button 
+  (click)="toggleModal()" 
+  class="fixed bottom-6 right-6 bg-indigo-600 text-white rounded-full p-4 shadow-lg hover:bg-indigo-700 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 z-50 hover:scale-110"
+  aria-label="Open AI Assistant">
+  <lucide-icon name="Bot"></lucide-icon>
+
+</button>
+
+<div *ngIf="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ease-in-out">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col transform transition-all duration-300 ease-in-out">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h3 class="text-xl font-semibold text-gray-800 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        ClickShop AI
+      </h3>
+      <button (click)="toggleModal()" class="text-gray-400 hover:text-gray-500 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <div class="p-4 flex-1 overflow-y-auto">
+      <div *ngIf="!aiResponse" class="mb-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">Try these suggestions:</h4>
+        <div class="flex flex-wrap gap-2">
+          <button 
+            *ngFor="let prompt of samplePrompts" 
+            (click)="useSamplePrompt(prompt)"
+            class="px-3 py-1 text-sm bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors">
+            {{prompt}}
+          </button>
+        </div>
+      </div>
+      
+      <div *ngIf="aiResponse" class="mb-4">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <div class="flex items-start">
+            <div class="bg-indigo-100 p-2 rounded-full mr-3 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <div class="flex-1 text-gray-800 text-sm leading-relaxed">
+              <div [innerHTML]="formattedResponse" class="space-y-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="isLoading" class="flex items-center justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    </div>
+    
+    <div class="border-t p-4">
+      <div class="flex space-x-2">
+        <input 
+          type="text" 
+          [(ngModel)]="userPrompt" 
+          placeholder="Ask Our AI..." 
+          class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+          (keyup.enter)="sendPrompt()">
+        <button 
+          (click)="sendPrompt()" 
+          [disabled]="isLoading || !userPrompt.trim()"
+          [ngClass]="{'bg-indigo-600 hover:bg-indigo-700': !isLoading && userPrompt.trim(), 'bg-indigo-400 cursor-not-allowed': isLoading || !userPrompt.trim()}"
+          class="text-white px-4 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          <svg *ngIf="!isLoading" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+          </svg>
+          <div *ngIf="isLoading" class="h-5 w-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
