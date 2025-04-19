@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8081'; 
+  private apiUrl = 'http://localhost:8081';
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -28,6 +28,20 @@ export class AuthService {
         this.logout();
       }
     }
+  }
+
+  sendOtp(email: string, name: string): Observable<any> {
+    
+    return this.http.post(`${this.apiUrl}/auth/send-otp`, { 
+      email,
+      name: name
+    });
+
+  }
+
+  verifyOtp(email: string, otp: string): Observable<any> {
+    
+    return this.http.post(`${this.apiUrl}/auth/verify-otp`, { email, otp });
   }
 
   getToken(): string | null {
@@ -56,8 +70,6 @@ export class AuthService {
 
     return null;
   }
-
-
 
   login(loginData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/login`, loginData).pipe(
@@ -94,8 +106,7 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/register`, registerData).pipe(
       tap((response: any) => {
         if (response && response.token) {
-          // Store token and user in localStorage
-
+          
           if (response.user) {
             localStorage.setItem('user', JSON.stringify(response.user));
             this.currentUserSubject.next(response.user);
@@ -106,7 +117,6 @@ export class AuthService {
   }
 
   checkAuth(): Observable<any> {
-    // Don't manually set the token here - let the interceptor handle it
     return this.http.get(`${this.apiUrl}/auth/validate-token`, {
       responseType: 'json'
     }).pipe(
@@ -119,12 +129,11 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    // perform any backend call here if needed
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
-    return of(true); // ✅ returning an observable
+    return of(true);
   }
 
   isLoggedIn(): boolean {

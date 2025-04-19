@@ -31,6 +31,7 @@ import { RoleRedirectComponent } from './components/util/role-redirect/role-redi
 import { GeminiAssistantComponent } from './components/util/gemini-assistant/gemini-assistant.component';
 import { LucideAngularModule, Bot } from 'lucide-angular';
 import { TokenInterceptorComponent } from './components/util/token-interceptor/token-interceptor.component';
+import { OtpInputComponent } from './components/reusable/otp-input/otp-input.component';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import { TokenInterceptorComponent } from './components/util/token-interceptor/t
     RoleRedirectComponent,
     GeminiAssistantComponent,
     TokenInterceptorComponent,
+    OtpInputComponent,
 
   ],
   imports: [

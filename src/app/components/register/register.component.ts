@@ -1,4 +1,3 @@
-// register.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,20 +15,20 @@ export class RegisterComponent  implements OnInit{
   errorMessage = '';
   showPassword = false;
   currentStep = 1;
-  totalSteps = 3;
-
+  totalSteps = 4;
+  otpVerified = false;
+  isResendingOtp = false;
+  
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private router: Router
   ) {
     this.registerForm = this.formBuilder.group({
-      // Step 1: Account Details
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       username: ['', [Validators.required, Validators.minLength(4)]],
       
-      // Step 2: Security
       password: ['', [
         Validators.required, 
         Validators.minLength(8),
@@ -37,7 +36,6 @@ export class RegisterComponent  implements OnInit{
       ]],
       confirmPassword: ['', [Validators.required]],
       
-      // Step 3: Contact & Address
       contactNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       addressLine1: ['', [Validators.required]],
       addressLine2: [''],
@@ -53,16 +51,15 @@ export class RegisterComponent  implements OnInit{
     this.loginCheck();
   }
   
-  loginCheck(){
+  loginCheck() {
     if (this.authService.isLoggedIn()) {
       const role = this.authService.getUserRole();
       if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
         this.router.navigate(['/admin/dashboard']);
       } else {
-        this.router.navigate(['/products']); // or wherever regular users go
+        this.router.navigate(['/products']);
       }
     }
-    
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -79,9 +76,15 @@ export class RegisterComponent  implements OnInit{
     if (this.currentStep === 1) {
       if (this.validateStep1()) {
         this.currentStep++;
+        this.sendOtp();
       }
     } else if (this.currentStep === 2) {
-      if (this.validateStep2()) {
+      
+      if (this.otpVerified) {
+        this.currentStep++;
+      }
+    } else if (this.currentStep === 3) {
+      if (this.validateStep3()) {
         this.currentStep++;
       }
     }
@@ -89,6 +92,9 @@ export class RegisterComponent  implements OnInit{
 
   previousStep() {
     if (this.currentStep > 1) {
+      if (this.currentStep === 2) {
+        this.otpVerified = false;
+      }
       this.currentStep--;
     }
   }
@@ -105,7 +111,7 @@ export class RegisterComponent  implements OnInit{
     return nameControl?.valid && emailControl?.valid && usernameControl?.valid ? true : false;
   }
 
-  validateStep2(): boolean {
+  validateStep3(): boolean {
     const passwordControl = this.registerForm.get('password');
     const confirmPasswordControl = this.registerForm.get('confirmPassword');
     
@@ -141,17 +147,14 @@ export class RegisterComponent  implements OnInit{
   
     this.authService.register(registerData).subscribe({
       next: (response: any) => {
-        // Store the JWT token
         if (response.token) {
           localStorage.setItem('token', response.token);
           
-          // Store user info if needed
           if (response.user) {
             localStorage.setItem('user', JSON.stringify(response.user));
           }
         }
         
-        // Handle successful registration
         this.router.navigate(['/login'], { 
           queryParams: { registered: 'true' } 
         });
@@ -169,5 +172,38 @@ export class RegisterComponent  implements OnInit{
    
   getProgressPercentage(): number {
     return ((this.currentStep - 1) / (this.totalSteps - 1)) * 100;
+  }
+
+  sendOtp() {
+    const email = this.registerForm.get('email')?.value;
+    const uname = this.registerForm.get('username')?.value;
+    const name = this.registerForm.get('name')?.value;
+    if (!email) return;
+    if (!uname) return;
+    if (!name) return;
+
+    this.isResendingOtp = true;
+    
+    this.authService.sendOtp(email, name).subscribe({
+      next: () => {
+        this.isResendingOtp = false;
+      },
+      error: (error) => {
+        console.error('Failed to send OTP:', error);
+        this.isResendingOtp = false;
+        this.errorMessage = 'Failed to send verification code. Please try again.';
+      }
+    });
+  }
+
+  handleOtpVerified(verified: boolean) {
+    this.otpVerified = verified;
+    if (verified) {
+      this.currentStep++;
+    }
+  }
+
+  handleResendOtp() {
+    this.sendOtp();
   }
 }
