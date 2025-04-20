@@ -29,12 +29,23 @@ export class ProductDetailComponent implements OnInit {
     private productService: ProductServiceService,
     private toast:HotToastService
   ) { }
+  relatedProducts: Product[] = [];
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       const productId = +params['id'];
       this.loadProductDetails(productId);
     });
+
+    this.productService.getAllProducts().subscribe(products => {
+      this.relatedProducts = products.filter(p => 
+        p.category === this.product?.category && p.id !== this.product.id
+      ).slice(0, 4); // Limit to 4 products
+    });
+  }
+
+  viewProductDetails(productId: number): void {
+    this.router.navigate(['/product', productId]);
   }
 
   loadProductDetails(productId: number): void {

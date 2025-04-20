@@ -92,7 +92,7 @@ export class ProductsComponent implements OnInit {
         }
         this.cartService.refreshCartCount();
       },
-      error: () => {} // Should never get here because of catchError
+      error: () => {}
     });
   }
 

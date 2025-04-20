@@ -46,8 +46,7 @@ const routes: Routes = [
       { path: 'viewproducts/edit/:id', component: EditProductsComponent },
       { path: 'viewproducts/add', component: EditProductsComponent },
       { path: 'vieworders', component: OrderManageComponent  },
-      { path: 'vieworders/:id', component: OrderDetailComponent },
-      // { path: 'settings', component: AdminSettingsComponent }
+      { path: 'vieworders/:id', component: OrderDetailComponent }
     ]
   }
 

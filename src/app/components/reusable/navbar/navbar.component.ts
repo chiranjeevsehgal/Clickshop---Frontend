@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { CartService } from '../../../services/cart/get-cart.service';
 import { AuthService } from '../../../services/authService/auth.service';
 import { HotToastService } from '@ngxpert/hot-toast';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { ProfileService } from '../../../services/user/profile.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,12 +14,14 @@ import { HotToastService } from '@ngxpert/hot-toast';
 })
 export class NavbarComponent implements OnInit {
   cartCount: number = 0;
+  user: any = null
 
   constructor(
     private cartService: CartService,
     private authService: AuthService,
+    private userService: ProfileService,
     private router: Router,
-    private toast: HotToastService
+    private toast: HotToastService,
   ) { }
 
   ngOnInit(): void {
@@ -25,9 +29,23 @@ export class NavbarComponent implements OnInit {
     if (this.isLoggedIn()) {
       this.cartService.refreshCartCount();
     }
+    this.loadUserProfile();
     
     this.cartService.cartCount$.subscribe(count => {
       this.cartCount = count;
+    });
+  }
+
+  loadUserProfile(): void {
+    this.userService.getUserProfile().subscribe({
+      next: (userData) => {
+        this.user = userData; 
+        console.log(this.user);
+      },
+      
+      error: (error) => {
+        console.error('Error loading profile:', error);
+      }
     });
   }
 

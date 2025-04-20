@@ -1,82 +1,105 @@
 <!-- products.component.html -->
-<div class="min-h-screen bg-gray-100">
+<div class="min-h-screen bg-neutral-50 dark:bg-gray-900">
   <!-- Navigation Bar -->
   <app-navbar></app-navbar>
 
   <!-- Main Content -->
-  <div class="container mx-auto px-4 py-8">
+  <div class="container mx-auto px-4 py-10 max-w-7xl">
     <!-- Page Title and Search -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Our Products</h1>
-      <div class="w-full md:w-1/3 relative">
-        <input type="text" [(ngModel)]="searchTerm" placeholder="Search products..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-3 top-3 text-gray-400" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+      <h1 class="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Our Products</h1>
+      <div class="w-full md:w-2/5 relative">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="Search products..." 
+          class="w-full px-5 py-3 bg-white dark:bg-gray-800 border-0 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 dark:text-gray-200 placeholder-gray-400"
+        >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-5 top-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
     </div>
 
     <!-- Categories Filter -->
-    <div class="mb-8">
-      <div class="flex flex-wrap gap-2">
-        <button (click)="selectedCategory = 'All'"
-          [ngClass]="{'bg-indigo-600 text-white': selectedCategory === 'All', 'bg-gray-200 text-gray-800': selectedCategory !== 'All'}"
-          class="px-4 py-2 rounded-full text-sm font-medium transition-colors">
+    <div class="mb-10">
+      <div class="flex flex-wrap gap-3">
+        <button 
+          (click)="selectedCategory = 'All'"
+          [ngClass]="{'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md': selectedCategory === 'All', 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700': selectedCategory !== 'All'}"
+          class="px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-lg"
+        >
           All
         </button>
-        <button *ngFor="let category of categories" (click)="selectedCategory = category"
-          [ngClass]="{'bg-indigo-600 text-white': selectedCategory === category, 'bg-gray-200 text-gray-800': selectedCategory !== category}"
-          class="px-4 py-2 rounded-full text-sm font-medium transition-colors">
+        <button 
+          *ngFor="let category of categories" 
+          (click)="selectedCategory = category"
+          [ngClass]="{'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md': selectedCategory === category, 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700': selectedCategory !== category}"
+          class="px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-lg"
+        >
           {{category}}
         </button>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div *ngIf="loading" class="flex justify-center items-center h-64">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+    <div *ngIf="loading" class="flex justify-center items-center h-80">
+      <div class="relative w-20 h-20">
+        <div class="absolute top-0 left-0 w-full h-full rounded-full border-4 border-gray-200 dark:border-gray-700"></div>
+        <div class="absolute top-0 left-0 w-full h-full rounded-full border-4 border-t-indigo-600 border-l-indigo-600 animate-spin"></div>
+      </div>
     </div>
 
     <!-- Product Grid -->
-    <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
       <!-- Product Card -->
-      <div *ngFor="let product of filteredProducts"
-        class="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
-        <img [src]="product.imageUrl || placeholderProduct" alt="{{product.name}}"
-          class="w-full h-48 object-cover object-center">
-        <div class="p-4">
-          <div class="flex justify-between items-start mb-2">
-            <h3 class="text-lg font-semibold text-gray-800 truncate">{{product.name}}</h3>
-            <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">{{product.category}}</span>
-          </div>
-          <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{product.description}}</p>
-          <div class="flex justify-between items-center">
-            <span class="text-xl font-bold text-indigo-700">{{product.price.toFixed(2) | currency:'INR'}}</span>
-            <div class="flex space-x-2">
-              <button (click)="viewProductDetails(product.id)"
-                class="p-2 text-gray-600 hover:text-indigo-600 transition-colors rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </button>
-              <button class="wishlist-button" (click)="toggleWishlist($event, product)"
-                [class.active]="isInWishlist(product.id)" title="Toggle Wishlist">
-                <span *ngIf="isInWishlist(product.id)">❤️</span>
-                <span *ngIf="!isInWishlist(product.id)">🤍</span>
-              </button>
-              <button (click)="addToCart(product)"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      <div (click)="viewProductDetails(product.id)" *ngFor="let product of filteredProducts" class="group relative bg-white dark:bg-gray-800 rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
+        <!-- Badge - Top right corner -->
+        <span class="absolute top-4 right-4 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-300 text-xs px-3 py-1.5 rounded-full font-medium z-10">
+          {{product.category}}
+        </span>
+        
+        <!-- Wishlist button - Top left corner -->
+        <button 
+          class="wishlist-button absolute top-4 left-4 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-2 rounded-full shadow-md transition-transform hover:scale-110" 
+          (click)="toggleWishlist($event, product)"
+          [class.active]="isInWishlist(product.id)" 
+          title="Toggle Wishlist"
+        >
+          <span *ngIf="isInWishlist(product.id)" class="text-lg">❤️</span>
+          <span *ngIf="!isInWishlist(product.id)" class="text-lg">🤍</span>
+        </button>
+        
+        <!-- Image container with overlay -->
+        <div class="relative overflow-hidden h-64">
+          <img 
+            [src]="product.imageUrl || placeholderProduct" 
+            alt="{{product.name}}"
+            class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-6 flex flex-col flex-grow">
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2 line-clamp-1">{{product.name}}</h3>
+          <p class="text-gray-600 dark:text-gray-300 text-sm mb-6 line-clamp-2 flex-grow">{{product.description}}</p>
+          
+          <div class="flex justify-between items-center mt-auto">
+            <span class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              {{product.price.toFixed(2) | currency:'INR'}}
+            </span>
+            
+            <div class="flex space-x-3">
+              
+              
+              <!-- Add to cart button -->
+              <button 
+                (click)="addToCart(product)"
+                class="p-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </button>
             </div>
@@ -86,35 +109,38 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="!loading && filteredProducts.length === 0" class="flex flex-col items-center justify-center h-64">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24"
-        stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <div *ngIf="!loading && filteredProducts.length === 0" class="flex flex-col items-center justify-center h-80 bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-10">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-gray-300 dark:text-gray-600 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <p class="text-gray-500 text-lg">No products found matching your criteria</p>
-      <button (click)="searchTerm = ''; selectedCategory = 'All'"
-        class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+      <p class="text-gray-500 dark:text-gray-400 text-xl font-medium mb-4">No products found matching your criteria</p>
+      <button 
+        (click)="searchTerm = ''; selectedCategory = 'All'"
+        class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all duration-200 font-medium"
+      >
         Clear filters
       </button>
     </div>
 
     <!-- Pagination -->
-    <div *ngIf="!loading && filteredProducts.length > 0" class="mt-8 flex justify-center">
-      <nav class="flex items-center space-x-2">
-        <button class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">
-          Previous
+    <div *ngIf="!loading && filteredProducts.length > 0" class="mt-12 flex justify-center">
+      <nav class="flex items-center space-x-1">
+        <button class="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
-        <button class="px-3 py-1 rounded bg-indigo-600 text-white">1</button>
-        <button class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">2</button>
-        <button class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">3</button>
-        <button class="px-3 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">
-          Next
+        <button class="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium">1</button>
+        <button class="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors">2</button>
+        <button class="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors">3</button>
+        <button class="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </nav>
     </div>
   </div>
   
-  <!-- Add Gemini AI Assistant Component here -->
   <app-gemini-assistant></app-gemini-assistant>
 </div>
