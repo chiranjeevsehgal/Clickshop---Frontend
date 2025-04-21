@@ -26,8 +26,6 @@ export class AuthGuard implements CanActivate {
     // Verify token validity with server
     return this.authService.checkAuth().pipe(
       map(response => {
-        // If we get here, the user is authenticated
-        console.log('Auth check successful', response);
         return true;
       }),
       catchError(error => {

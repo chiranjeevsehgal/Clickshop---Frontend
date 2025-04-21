@@ -133,7 +133,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
     if (this.countdown > 0) return;
     
     this.otpForm.reset();
-    
+    this.errorMessage = ''
     this.resendOtp.emit();
     
     this.startCountdown();

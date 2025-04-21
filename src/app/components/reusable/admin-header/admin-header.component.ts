@@ -25,7 +25,6 @@ export class AdminHeaderComponent implements OnInit {
     this.profileService.getUserProfile().subscribe({
       next: (adminData) => {
         this.admin = adminData; 
-        console.log(this.admin);
       },
       
       error: (error) => {

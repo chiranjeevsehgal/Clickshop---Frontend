@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { CartService } from '../../../services/cart/get-cart.service';
 import { RazorpayService } from '../../../services/user/razorpay.service';
 import { HotToastService } from '@ngxpert/hot-toast';
+import confetti from 'canvas-confetti';
+import { ProfileService } from '../../../services/user/profile.service';
 
 @Component({
   selector: 'app-cart-items',
@@ -13,12 +15,13 @@ import { HotToastService } from '@ngxpert/hot-toast';
 })
 export class CartComponent implements OnInit {
   cartItems: CartItem[] = [];
-  
+  user: any = null;
   isLoading: boolean = true;
   cartTotal: number = 0;
   shippingCost: number = 99;
   discountCode: string = '';
   discountApplied: boolean = false;
+  discountRate: number = 0;
   discountAmount: number = 0;
   processingOrder: boolean = false;
   customerInfo: any = {};
@@ -31,11 +34,30 @@ export class CartComponent implements OnInit {
     private router: Router,
     private razorpayService: RazorpayService,
     private toast: HotToastService,
+    private userService: ProfileService,
 
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.fetchCartItems();
+    this.loadUserProfile();
+    this.fireConfetti()
+  }
+
+  loadUserProfile(): void {
+    this.isLoading = true;
+    this.userService.getUserProfile().subscribe({
+      next: (userData) => {
+        this.user = userData;
+        this.isLoading = false;
+        console.log(this.user);
+
+      },
+      error: (error) => {
+        console.error('Error loading profile:', error);
+        this.isLoading = false;
+      }
+    });
   }
 
   fetchCartItems(): void {
@@ -45,7 +67,7 @@ export class CartComponent implements OnInit {
         this.cartItems = items.map(item => ({
           ...item,
           subtotal: item.totalPrice,
-          price: item.totalPrice/item.quantity
+          price: item.totalPrice / item.quantity
         }));
         this.calculateTotal();
         this.isLoading = false;
@@ -77,7 +99,7 @@ export class CartComponent implements OnInit {
   }
 
   removeItem(cartId: number): void {
-    
+
     this.cartService.removeItem(cartId).subscribe({
       next: () => {
         this.cartItems = this.cartItems.filter(item => item.cartId !== cartId);
@@ -87,7 +109,7 @@ export class CartComponent implements OnInit {
         alert('Item removed from cart!')
       },
       error: (err) => console.error('Error removing item:', err)
-      
+
 
     });
   }
@@ -97,6 +119,7 @@ export class CartComponent implements OnInit {
 
     if (this.discountCode === 'SAVE10') {
       this.discountAmount = this.cartTotal * 0.1;
+      this.discountRate = 0.1;
       this.discountApplied = true;
     } else {
       alert('Invalid discount code');
@@ -109,23 +132,41 @@ export class CartComponent implements OnInit {
       return;
     }
 
+    // Check if user has required information
+    if (!this.user || !this.user.address || !this.user.phone) {
+      // Show a modal or redirect to profile completion page
+      this.toast.error('Please update your address and contact information before checkout');
+
+      setTimeout(() => {
+        this.router.navigate(['/profile'], {
+          queryParams: {
+            returnUrl: '/cart',
+            requiresUpdate: true
+          }
+        });
+      }, 3000)
+      return;
+    }
+
     this.processingOrder = true;
 
     const orderData = {
       items: this.cartItems,
       subtotal: this.cartTotal,
       shipping: this.shippingCost,
-      discount: this.discountAmount,
+      discount: (this.cartTotal + this.shippingCost) * this.discountRate,
+      discountRate: this.discountRate,
       total: this.cartTotal + this.shippingCost - this.discountAmount
     };
 
     // Create an order in the backend first
     this.cartService.createOrder(orderData).subscribe({
       next: (orderResponse) => {
-        
-        this.initiatePayment(orderResponse, orderData);
-        
-        
+        console.log(orderResponse);
+        this.initiatePayment(orderData,orderResponse);
+          console.log(orderData);
+          
+
       },
       error: (err) => {
         console.error('Error creating order:', err);
@@ -136,19 +177,23 @@ export class CartComponent implements OnInit {
   }
 
   initiatePayment(orderData: any, originalData: any): void {
-    
-    
+    console.log("orderData");
+    console.log(orderData);
+    console.log("originalData");
+    console.log(originalData);
+ 
     const options = {
       key: 'rzp_test_nszEMOVRLAZUFz',
-      amount: Math.round(orderData.total), // Amount in paisa
+      amount: Math.round(originalData.amount), // Amount in paisa
       currency: 'INR',
       name: 'ClickShop',
+      discount: this.discountAmount,
       description: 'Purchase from ClickShop',
-      order_id: orderData.razorpayOrderId,
+      order_id: originalData.razorpayOrderId,
       prefill: {
-        name: orderData.user.name,
-        email: orderData.user.email,
-        contact: orderData.user.phone
+        name: originalData.user.name,
+        email: originalData.user.email,
+        contact: originalData.user.phone
       },
       notes: {
         address: 'Chiranjeev Sehgal'
@@ -171,31 +216,35 @@ export class CartComponent implements OnInit {
         });
     });
   }
-  
+
 
   handlePaymentSuccess(response: any, orderData: any, originalData: any): void {
     // To verify payment
-    
+
     const paymentData = {
       razorpayPaymentId: response.razorpay_payment_id,
       razorpayOrderId: response.razorpay_order_id,
       razorpaySignature: response.razorpay_signature,
       orderId: orderData.orderId
     };
-    
 
+    console.log(orderData);
+    
     this.razorpayService.verifyPayment(paymentData).subscribe({
       next: (verificationResponse) => {
-        
+
         this.cartService.saveOrder({
           ...orderData,
           paymentId: response.razorpay_payment_id,
-          paymentStatus: 'COMPLETED', 
+          paymentStatus: 'COMPLETED',
+          discount: this.discountAmount,
+          discountRate: this.discountRate
         }, originalData).subscribe({
           next: (finalOrderResponse) => {
             this.cartService.clearCart().subscribe(() => {
               this.processingOrder = false;
               this.toast.success('Payment successful! Order placed.');
+              this.fireConfetti();
               this.router.navigate(['/orders'], {
                 state: { orderDetails: finalOrderResponse }
               });
@@ -229,8 +278,65 @@ export class CartComponent implements OnInit {
       document.body.appendChild(script);
     });
   }
+
+  private fireConfetti() {
+    const count = 600; // Increased particle count
+
+    function fireFromLeftCorner(particleRatio: number, opts: any) {
+      confetti({
+        origin: {
+          x: 0.1, // Left side
+          y: 0.9, // Bottom
+        },
+        angle: 60, // Angle upward and right
+        ...opts,
+        particleCount: Math.floor(count * particleRatio),
+      });
+    }
+
+    function fireFromRightCorner(particleRatio: number, opts: any) {
+      confetti({
+        origin: {
+          x: 0.9, // Right side
+          y: 0.9, // Bottom
+        },
+        angle: 120, // Angle upward and left
+        ...opts,
+        particleCount: Math.floor(count * particleRatio),
+      });
+    }
+
+    // Fire from left corner
+    fireFromLeftCorner(0.25, { spread: 30, startVelocity: 55 });
+    fireFromLeftCorner(0.2, { spread: 60, decay: 0.94 });
+    fireFromLeftCorner(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+
+    // Fire from right corner
+    fireFromRightCorner(0.25, { spread: 30, startVelocity: 55 });
+    fireFromRightCorner(0.2, { spread: 60, decay: 0.94 });
+    fireFromRightCorner(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+
+    // Additional bursts with colors from both corners
+    // setTimeout(() => {
+    //   fireFromLeftCorner(0.2, { 
+    //     colors: ['#ff0000', '#00ff00', '#ffff00'],
+    //     startVelocity: 45,
+    //     decay: 0.92
+    //   });
+
+    //   fireFromRightCorner(0.2, { 
+    //     colors: ['#0000ff', '#ff00ff', '#00ffff'],
+    //     startVelocity: 45,
+    //     decay: 0.92
+    //   });
+    // }, 300);
+
+
+  }
+
   getFormattedPrice(price: number): string {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'INR' }).format(price);
   }
+
 
 }

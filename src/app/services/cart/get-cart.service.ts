@@ -87,17 +87,31 @@ export class CartService {
   // Save completed order after successful payment
   saveOrder(orderData: any, originalData: any): Observable<any> {
 
+    console.log(orderData);
     console.log(originalData);
-    return this.http.post(`${this.apiUrl}/orders/save`, orderData, {
+
+    const combinedOrderData = {
+      ...originalData,
+      discount: orderData.discount,
+      shipping:orderData.shipping,
+      paymentStatus:orderData.paymentStatus,
+      paymentId:orderData.paymentId,
+      total:orderData.total,
+      subtotal:orderData.subtotal,
+      discountRate:orderData.discountRate
+    };
+
+
+    return this.http.post(`${this.apiUrl}/orders/save`, combinedOrderData, {
       withCredentials: true
     }).pipe(
       tap((orderResponse: any) => {
 
         if (orderResponse && orderResponse.orderId) {
-          
+
           // Reduce stock for each product
           if (originalData?.items && originalData.items.length > 0) {
-            originalData.items.forEach((item: {productId: number, quantity: number}) => {
+            originalData.items.forEach((item: { productId: number, quantity: number }) => {
               this.http.post(`${this.apiUrl}/product/${item.productId}/reduce-stock`, {
                 quantity: item.quantity
               }, {
@@ -109,7 +123,7 @@ export class CartService {
             });
           }
 
-        // Prepare data for emails
+          // Prepare data for emails
           const emailPayload = {
             ...orderResponse,
             ...orderData,

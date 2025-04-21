@@ -31,12 +31,22 @@ export class AuthService {
   }
 
   sendOtp(email: string, name: string): Observable<any> {
-    
     return this.http.post(`${this.apiUrl}/auth/send-otp`, { 
-      email,
-      name: name
-    });
+        email,
+        name 
+      }).pipe(
+        tap(response => {
+          console.log('OTP response:', response);
+        })
+      );
+  }
 
+  checkEmailExists(email: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/auth/check-email`, { params: { email } });
+  }
+
+  checkUsernameExists(username: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/auth/check-username`, { params: { username } });
   }
 
   verifyOtp(email: string, otp: string): Observable<any> {

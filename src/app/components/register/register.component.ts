@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/authService/auth.service';
+import { catchError, debounceTime, distinctUntilChanged, map, Observable, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -9,7 +10,7 @@ import { AuthService } from '../../services/authService/auth.service';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent  implements OnInit{
+export class RegisterComponent implements OnInit {
   registerForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
@@ -18,7 +19,7 @@ export class RegisterComponent  implements OnInit{
   totalSteps = 4;
   otpVerified = false;
   isResendingOtp = false;
-  
+
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
@@ -26,16 +27,16 @@ export class RegisterComponent  implements OnInit{
   ) {
     this.registerForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      username: ['', [Validators.required, Validators.minLength(4)]],
-      
+      email: ['', [Validators.required, Validators.email], [this.emailValidator()]],
+      username: ['', [Validators.required, Validators.minLength(4)], [this.usernameValidator()]],
+
       password: ['', [
-        Validators.required, 
+        Validators.required,
         Validators.minLength(8),
         Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
       ]],
       confirmPassword: ['', [Validators.required]],
-      
+
       contactNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       addressLine1: ['', [Validators.required]],
       addressLine2: [''],
@@ -50,7 +51,39 @@ export class RegisterComponent  implements OnInit{
   ngOnInit(): void {
     this.loginCheck();
   }
-  
+
+  emailValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value) {
+        return of(null);
+      }
+
+      return of(control.value).pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap(value => this.authService.checkEmailExists(value)),
+        map(response => response.exists ? { emailTaken: true } : null),
+        catchError(() => of(null))
+      );
+    };
+  }
+
+  usernameValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value) {
+        return of(null);
+      }
+
+      return of(control.value).pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap(value => this.authService.checkUsernameExists(value)),
+        map(response => response.exists ? { usernameTaken: true } : null),
+        catchError(() => of(null))
+      );
+    };
+  }
+
   loginCheck() {
     if (this.authService.isLoggedIn()) {
       const role = this.authService.getUserRole();
@@ -79,7 +112,6 @@ export class RegisterComponent  implements OnInit{
         this.sendOtp();
       }
     } else if (this.currentStep === 2) {
-      
       if (this.otpVerified) {
         this.currentStep++;
       }
@@ -103,33 +135,35 @@ export class RegisterComponent  implements OnInit{
     const nameControl = this.registerForm.get('name');
     const emailControl = this.registerForm.get('email');
     const usernameControl = this.registerForm.get('username');
-    
+
     nameControl?.markAsTouched();
     emailControl?.markAsTouched();
     usernameControl?.markAsTouched();
-    
-    return nameControl?.valid && emailControl?.valid && usernameControl?.valid ? true : false;
+
+    // Also check if async validation is pending
+    return nameControl?.valid && emailControl?.valid && usernameControl?.valid && 
+           !emailControl?.pending && !usernameControl?.pending ? true : false;
   }
 
   validateStep3(): boolean {
     const passwordControl = this.registerForm.get('password');
     const confirmPasswordControl = this.registerForm.get('confirmPassword');
-    
+
     passwordControl?.markAsTouched();
     confirmPasswordControl?.markAsTouched();
-    
-    return passwordControl?.valid && confirmPasswordControl?.valid && 
-           !this.registerForm.hasError('passwordMismatch') ? true : false;
+
+    return passwordControl?.valid && confirmPasswordControl?.valid &&
+      !this.registerForm.hasError('passwordMismatch') ? true : false;
   }
 
   onSubmit() {
     if (this.registerForm.invalid) {
       return;
     }
-  
+
     this.isSubmitting = true;
     this.errorMessage = '';
-  
+
     const registerData = {
       name: this.registerForm.get('name')?.value,
       email: this.registerForm.get('email')?.value,
@@ -144,19 +178,19 @@ export class RegisterComponent  implements OnInit{
         zipCode: this.registerForm.get('zipCode')?.value
       }
     };
-  
+
     this.authService.register(registerData).subscribe({
       next: (response: any) => {
         if (response.token) {
           localStorage.setItem('authToken', response.token);
-          
+
           if (response.user) {
             localStorage.setItem('user', JSON.stringify(response.user));
           }
         }
-        
-        this.router.navigate(['/login'], { 
-          queryParams: { registered: 'true' } 
+
+        this.router.navigate(['/login'], {
+          queryParams: { registered: 'true' }
         });
       },
       error: (error) => {
@@ -169,7 +203,7 @@ export class RegisterComponent  implements OnInit{
       }
     });
   }
-   
+
   getProgressPercentage(): number {
     return ((this.currentStep - 1) / (this.totalSteps - 1)) * 100;
   }
@@ -183,7 +217,7 @@ export class RegisterComponent  implements OnInit{
     if (!name) return;
 
     this.isResendingOtp = true;
-    
+
     this.authService.sendOtp(email, name).subscribe({
       next: () => {
         this.isResendingOtp = false;
@@ -206,4 +240,31 @@ export class RegisterComponent  implements OnInit{
   handleResendOtp() {
     this.sendOtp();
   }
+
+  getFieldError(fieldName: string): string {
+    const field = this.registerForm.get(fieldName);
+    if (!field || !field.errors) return '';
+
+    if (field.errors['required']) return `${fieldName} is required`;
+    if (field.errors['minlength']) return `${fieldName} must be at least ${field.errors['minlength'].requiredLength} characters`;
+    if (field.errors['maxlength']) return `${fieldName} cannot exceed ${field.errors['maxlength'].requiredLength} characters`;
+    if (field.errors['email']) return 'Invalid email format';
+    if (field.errors['pattern']) return 'Invalid phone number format';
+    if (field.errors['emailTaken']) return 'Email is already registered';
+    if (field.errors['usernameTaken']) return 'Username is already taken';
+    
+    return '';
+  }
+
+  // Helper methods for template
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.registerForm.get(fieldName);
+    return field ? field.invalid && (field.dirty || field.touched) : false;
+  }
+
+  isFieldPending(fieldName: string): boolean {
+    const field = this.registerForm.get(fieldName);
+    return field ? field.pending : false;
+  }
+
 }

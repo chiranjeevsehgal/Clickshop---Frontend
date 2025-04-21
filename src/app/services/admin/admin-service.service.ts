@@ -157,6 +157,9 @@ export class AdminServiceService {
   }
 
   updateOrderStatus(orderId: number, status: string): Observable<any> {
+    console.log(status);
+    console.log(orderId);
+    
     return this.http.put(`${this.apiUrl_Orders}/${orderId}/status`, { status }, {
       withCredentials: true
     });

@@ -223,45 +223,66 @@ export class OrdersComponent implements OnInit {
     // Order status tracker
     const statusOptions = ['ORDERED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
     const orderStatus = order.status || 'ORDERED';
-    const statusIndex = statusOptions.indexOf(orderStatus);
-
-    // Draw status circles
-    const startY = 55;
-    const circleSpacing = 8;
-
-    statusOptions.forEach((status, index) => {
-      const x = 120;
-      const y = startY + (index * circleSpacing);
-
-      // Draw connector line
-      if (index > 0) {
-        if (index <= statusIndex) {
-          doc.setDrawColor(accentColor[0], accentColor[1], accentColor[2]);
-        } else {
-          doc.setDrawColor(220, 220, 220);
+    if (orderStatus === 'CANCELLED') {
+      // Draw a red cancelled badge
+      doc.setFillColor(254, 226, 226); // Light red background
+      doc.roundedRect(115, 52, 70, 25, 2, 2, 'F');
+      
+      doc.setTextColor(220, 38, 38); // Red text
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('CANCELLED', 150, 66, { align: 'center' });
+      
+      // Add cancellation date if available
+      // if (order.cancelledDate) {
+      //   doc.setFontSize(8);
+      //   doc.text(`Cancelled on: ${this.getFormattedDate(order.cancelledDate)}`, 150, 70, { align: 'center' });
+      // }
+      
+    
+    } else {
+      // Regular order status tracker for non-cancelled orders
+      const statusIndex = statusOptions.indexOf(orderStatus);
+    
+      // Draw status circles
+      const startY = 55;
+      const circleSpacing = 8;
+    
+      statusOptions.forEach((status, index) => {
+        const x = 120;
+        const y = startY + (index * circleSpacing);
+    
+        // Draw connector line
+        if (index > 0) {
+          if (index <= statusIndex) {
+            doc.setDrawColor(accentColor[0], accentColor[1], accentColor[2]);
+          } else {
+            doc.setDrawColor(220, 220, 220);
+          }
+          doc.setLineWidth(0.5);
+          doc.line(x, y - circleSpacing + 1.5, x, y - 1.5);
         }
-        doc.setLineWidth(0.5);
-        doc.line(x, y - circleSpacing + 1.5, x, y - 1.5);
-      }
-
-      // Draw circle
-      if (index <= statusIndex) {
-        doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
-      } else {
-        doc.setFillColor(220, 220, 220);
-      }
-      doc.circle(x, y, 1.5, 'F');
-
-      // Add status text
-      doc.setFont('helvetica', index <= statusIndex ? 'bold' : 'normal');
-      doc.setFontSize(8);
-      if (index <= statusIndex) {
-        doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
-      } else {
-        doc.setTextColor(150, 150, 150);
-      }
-      doc.text(status, 125, y + 0.5);
-    });
+    
+        // Draw circle
+        if (index <= statusIndex) {
+          doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+        } else {
+          doc.setFillColor(220, 220, 220);
+        }
+        doc.circle(x, y, 1.5, 'F');
+    
+        // Add status text
+        doc.setFont('helvetica', index <= statusIndex ? 'bold' : 'normal');
+        doc.setFontSize(8);
+        if (index <= statusIndex) {
+          doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+        } else {
+          doc.setTextColor(150, 150, 150);
+        }
+        doc.text(status, 125, y + 0.5);
+      });
+    }
+    
 
     // Add billing information
     doc.setDrawColor(220, 220, 220);
