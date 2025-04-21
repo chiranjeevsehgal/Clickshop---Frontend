@@ -3,7 +3,7 @@
   <div class="container mx-auto px-4 py-3">
     <div class="flex justify-between items-center">
       <!-- Logo Section -->
-      <a href="/products" class="flex items-center space-x-2">
+      <a href="/home" class="flex items-center space-x-2">
         <div class="bg-white/15 backdrop-blur-sm rounded-lg w-10 h-10 flex items-center justify-center shadow-md">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -16,11 +16,12 @@
       <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
         <!-- Desktop Navigation Links -->
         <div class="hidden md:flex items-center space-x-6 mr-4">
-          <a href="/products" class="font-medium text-white hover:text-indigo-200 transition-colors">Home</a>
+          
+          <a href="/home" class="font-medium text-white hover:text-indigo-200 transition-colors">Home</a>
+          <a href="/products" class="font-medium text-white hover:text-indigo-200 transition-colors">Products</a>
           
           <!-- Protected links - Only show to logged in users -->
           <ng-container *ngIf="isLoggedIn()">
-            <a href="/orders" class="font-medium text-white hover:text-indigo-200 transition-colors">Orders</a>
             <a href="/profile" class="font-medium text-white hover:text-indigo-200 transition-colors">Profile</a>
           </ng-container>
         </div>

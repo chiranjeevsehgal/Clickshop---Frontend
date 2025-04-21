@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductServiceService } from '../../../services/productService/product-service.service';
 import { Product } from '../../../models/Product';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../../services/cart/get-cart.service';
 import { HotToastService } from '@ngxpert/hot-toast';
@@ -16,25 +16,73 @@ import { WishlistService } from '../../../services/user/wishlist.service';
 })
 export class ProductsComponent implements OnInit {
   products: Product[] = [];
+  filteredProduct: Product[] = [];
   loading: boolean = true;
   searchTerm: string = '';
   categories: string[] = [];
   selectedCategory: string = 'All';
   wishlistProductIds: Set<number> = new Set();
 
-  
+
   constructor(
     private productService: ProductServiceService,
     private cartService: CartService,
     private wishlistService: WishlistService,
     private router: Router,
-    private toast:HotToastService
+    private toast: HotToastService,
+    private route: ActivatedRoute,
+
   ) { }
 
   ngOnInit(): void {
     this.loadProducts();
     this.loadWishlist()
+
+    // Check for category parameter in URL
+    this.route.queryParams.subscribe(params => {
+      if (params['category']) {
+        this.selectedCategory = params['category'];
+        this.loadProductsByCategory(this.selectedCategory);
+      } else {
+        this.loadProducts();
+      }
+
+      if (params['search']) {
+        this.searchTerm = params['search'];
+        this.filteredProducts;
+      }
+    });
   }
+
+  loadProductsByCategory(category: string): void {
+    this.loading = true;
+    this.selectedCategory = category;
+
+    // Update URL with the selected category
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { category: category !== 'All' ? category : null },
+      queryParamsHandling: 'merge'
+    });
+
+    if (category === 'All') {
+      this.loadProducts();
+      return;
+    }
+
+    this.productService.getProductsByCategory(category).subscribe({
+      next: (products) => {
+        this.products = products;
+        this.filteredProduct = [...products];
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error(`Error loading products for category ${category}:`, error);
+        this.loading = false;
+      }
+    });
+  }
+
 
   loadProducts(): void {
     this.loading = true;
@@ -51,7 +99,7 @@ export class ProductsComponent implements OnInit {
         this.categories = Array.from(uniqueCategories);
         this.loading = false;
         console.log(this.products);
-        
+
       },
       error: (error) => {
         console.error('Error fetching products:', error);
@@ -60,10 +108,23 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  filterProducts(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredProduct = [...this.products];
+      return;
+    }
+
+    const term = this.searchTerm.toLowerCase().trim();
+    this.filteredProduct = this.products.filter(product => 
+      product.name.toLowerCase().includes(term) || 
+      product.description.toLowerCase().includes(term)
+    );
+  }
+
   get filteredProducts(): Product[] {
     return this.products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-                           product.description.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesSearch = product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchesCategory = this.selectedCategory === 'All' || product.category === this.selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -73,12 +134,12 @@ export class ProductsComponent implements OnInit {
     this.productService.addToCart(product).pipe(
       catchError((error) => {
         console.error('Error adding to cart:', error);
-        
+
         if (error.status === 401 && error.error && error.error.message === 'Please login to add items to cart') {
           this.toast.info(error.error.message || 'Please login to add items to cart');
           return of({ _handled: true, originalError: error });
         }
-        
+
         this.toast.error('Failed to add product to cart. Please try again.');
         return of({ _handled: true, originalError: error });
       })
@@ -87,14 +148,14 @@ export class ProductsComponent implements OnInit {
         if (res && res._handled) {
           return;
         }
-        
+
         // Success case
         if (res.message) {
           this.toast.success(res.message);
         }
         this.cartService.refreshCartCount();
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -103,7 +164,7 @@ export class ProductsComponent implements OnInit {
       wishlistItems => {
         // Clear the set first
         this.wishlistProductIds.clear();
-        
+
         // Add product IDs to the set
         wishlistItems.forEach((item: { product: { id: number } }) => {
           this.wishlistProductIds.add(item.product.id);
@@ -138,7 +199,7 @@ export class ProductsComponent implements OnInit {
       },
       error => {
         console.error('Error adding to wishlist:', error);
-        
+
         // Check if the error contains a login required message
         if (error.status === 401 || (error.error && error.error.message === 'Please login to add items to wishlist')) {
           this.toast.info('Please login to add items to wishlist');

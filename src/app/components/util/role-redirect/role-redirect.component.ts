@@ -19,7 +19,7 @@ export class RoleRedirectComponent implements OnInit {
       if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
         this.router.navigate(['/admin/dashboard']);
       } else {
-        this.router.navigate(['/products']);
+        this.router.navigate(['/home']);
       }
     } else {
       this.router.navigate(['/login']);

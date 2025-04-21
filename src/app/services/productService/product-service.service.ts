@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { catchError, Observable } from 'rxjs';
 import { Product } from '../../models/Product';
 
 @Injectable({
@@ -26,6 +26,24 @@ export class ProductServiceService {
       headers,
       withCredentials: true
     });
+  }
+
+  getCategories(): Observable<string[]> {
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+
+    return this.http.get<string[]>(`${this.apiUrl}/product/categories`, { headers, withCredentials: true })
+      
+  }
+
+  getPopularProducts(limit: number = 8): Observable<Product[]> {
+    const params = new HttpParams().set('popular', 'true');
+    const headers = this.token
+      ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
+      : new HttpHeaders();
+    return this.http.get<Product[]>(`${this.apiUrl}/product`, { params, headers, withCredentials: true })
+      
   }
 
   getProductById(id: number): Observable<Product> {

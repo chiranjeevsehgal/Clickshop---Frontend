@@ -20,6 +20,7 @@ import { WishlistComponent } from './components/user/wishlist/wishlist.component
 import { RoleRedirectComponent } from './components/util/role-redirect/role-redirect.component';
 import { userGuard } from './guards/user.guard';
 import { TokenInterceptorComponent } from './components/util/token-interceptor/token-interceptor.component';
+import { CategoriesComponent } from './components/user/categories/categories.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -32,6 +33,7 @@ const routes: Routes = [
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard, userGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, userGuard] },
   { path: 'wishlist', component: WishlistComponent, canActivate: [AuthGuard, userGuard] },
+  { path: 'home', component: CategoriesComponent, canActivate: [AuthGuard, userGuard] },
   
   // Admin route
   {

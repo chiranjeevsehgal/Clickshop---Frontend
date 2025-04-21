@@ -476,6 +476,7 @@ export class OrderDetailComponent implements OnInit {
       { header: 'Item', dataKey: 'item' },
       { header: 'Unit Price', dataKey: 'price' },
       { header: 'Quantity', dataKey: 'quantity' },
+      { header: 'Discount', dataKey: 'discount' },
       { header: 'Total', dataKey: 'total' }
     ];
 
@@ -490,6 +491,7 @@ export class OrderDetailComponent implements OnInit {
         item: product.name,
         price: this.getInvoiceFormattedPrice(product.price),
         quantity: quantity,
+        discount: this.getInvoiceFormattedPrice(this.order.order.discount),
         total: this.getInvoiceFormattedPrice(product.price * quantity)
       };
       tableRows.push(itemData);

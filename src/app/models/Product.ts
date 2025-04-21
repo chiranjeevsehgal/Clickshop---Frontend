@@ -9,6 +9,7 @@ export interface Product {
     stockQuantity: number;
     rating?: number;
     stock:number,
+    featured?: boolean;
     inStock: boolean;
     onSale?:boolean
   }

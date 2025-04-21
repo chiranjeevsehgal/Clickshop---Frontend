@@ -32,6 +32,7 @@ import { GeminiAssistantComponent } from './components/util/gemini-assistant/gem
 import { LucideAngularModule, Bot } from 'lucide-angular';
 import { TokenInterceptorComponent } from './components/util/token-interceptor/token-interceptor.component';
 import { OtpInputComponent } from './components/reusable/otp-input/otp-input.component';
+import { CategoriesComponent } from './components/user/categories/categories.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +60,7 @@ import { OtpInputComponent } from './components/reusable/otp-input/otp-input.com
     GeminiAssistantComponent,
     TokenInterceptorComponent,
     OtpInputComponent,
+    CategoriesComponent,
 
   ],
   imports: [
