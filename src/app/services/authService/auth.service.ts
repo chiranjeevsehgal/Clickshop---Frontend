@@ -130,7 +130,10 @@ export class AuthService {
 
   logout(): Observable<any> {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('role');
     localStorage.removeItem('user');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('userId');
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
     return of(true);

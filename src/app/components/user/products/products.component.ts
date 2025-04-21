@@ -50,6 +50,8 @@ export class ProductsComponent implements OnInit {
         });
         this.categories = Array.from(uniqueCategories);
         this.loading = false;
+        console.log(this.products);
+        
       },
       error: (error) => {
         console.error('Error fetching products:', error);

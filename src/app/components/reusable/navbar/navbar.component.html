@@ -70,7 +70,7 @@
             <!-- Account Menu Header -->
             <div class="px-4 py-3 border-b border-gray-100">
               <p class="text-sm text-gray-400">Signed in as</p>
-              <p class="text-sm font-medium text-gray-900 truncate">{{user.name}}</p>
+              <p class="text-sm font-medium text-gray-900 truncate" *ngIf="user">{{user.name}}</p>
             </div>
             
             <!-- Profile -->

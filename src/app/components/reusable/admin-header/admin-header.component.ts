@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/authService/auth.service';
+import { ProfileService } from '../../../services/user/profile.service';
 
 @Component({
   selector: 'app-admin-header',
@@ -9,19 +10,28 @@ import { AuthService } from '../../../services/authService/auth.service';
   styleUrl: './admin-header.component.css'
 })
 export class AdminHeaderComponent implements OnInit {
-  adminName: string = 'Admin';
-
+  admin: any = null
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private profileService: ProfileService,
   ) { }
 
   ngOnInit(): void {
-    // Try to get the admin name from localStorage or a user profile service
-    const storedName = localStorage.getItem('adminName');
-    if (storedName) {
-      this.adminName = storedName;
-    }
+    this.loadUserProfile();
+  }
+
+  loadUserProfile(): void {
+    this.profileService.getUserProfile().subscribe({
+      next: (adminData) => {
+        this.admin = adminData; 
+        console.log(this.admin);
+      },
+      
+      error: (error) => {
+        console.error('Error loading profile:', error);
+      }
+    });
   }
 
   logout(): void {
@@ -31,7 +41,7 @@ export class AdminHeaderComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Logout error:', error);
-        // Even if there's an error, navigate to login
+        
         this.router.navigate(['/login']);
       }
     });

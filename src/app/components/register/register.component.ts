@@ -148,7 +148,7 @@ export class RegisterComponent  implements OnInit{
     this.authService.register(registerData).subscribe({
       next: (response: any) => {
         if (response.token) {
-          localStorage.setItem('token', response.token);
+          localStorage.setItem('authToken', response.token);
           
           if (response.user) {
             localStorage.setItem('user', JSON.stringify(response.user));

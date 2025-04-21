@@ -6,6 +6,7 @@ import { Product } from '../../../models/Product';
 import { CartService } from '../../../services/cart/get-cart.service';
 import { catchError, of } from 'rxjs';
 import { HotToastService } from '@ngxpert/hot-toast';
+import { WishlistService } from '../../../services/user/wishlist.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -18,6 +19,7 @@ export class ProductDetailComponent implements OnInit {
   loading: boolean = true;
   error: string | null = null;
   quantity: number = 1;
+  wishlistProductIds: Set<number> = new Set();
 
   
   placeholderProduct: string = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi5YNRPU4910yPsW1yobc1J7of1kMM-pww1Qf5lkpKePvG1-3GeRFJPh0U9w0FLoeojueyp4HtPxcqWkGJOudVgEv3tpEnJQM9-Ia-eemENMJTFpTFm6WeZiiB2nBRDIwl9PeRGvsjEJTI/s1600/placeholder-image.jpg'
@@ -26,6 +28,7 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cartService: CartService,
+    private wishlistService: WishlistService,
     private productService: ProductServiceService,
     private toast:HotToastService
   ) { }
@@ -36,6 +39,8 @@ export class ProductDetailComponent implements OnInit {
       const productId = +params['id'];
       this.loadProductDetails(productId);
     });
+
+    this.loadWishlist()
 
     this.productService.getAllProducts().subscribe(products => {
       this.relatedProducts = products.filter(p => 
@@ -104,12 +109,77 @@ export class ProductDetailComponent implements OnInit {
           }
           this.cartService.refreshCartCount();
         },
-        error: () => {} // Should never get here because of catchError
+        error: () => {}
       });
     }
+  }
+
+  loadWishlist(): void {
+    this.wishlistService.getWishlist().subscribe(
+      wishlistItems => {
+        // Clear the set first
+        this.wishlistProductIds.clear();
+        
+        // Add product IDs to the set
+        wishlistItems.forEach((item: { product: { id: number } }) => {
+          this.wishlistProductIds.add(item.product.id);
+        });
+      },
+      error => {
+        console.error('Error fetching wishlist:', error);
+      }
+    );
+  }
+
+  isInWishlist(productId: number): boolean {
+    return this.wishlistProductIds.has(productId);
+  }
+
+  toggleWishlist(event: Event, product: any): void {
+    event.stopPropagation(); // Prevent event bubbling
+
+
+    if (this.isInWishlist(product.id)) {
+      this.removeFromWishlist(product.id);
+    } else {
+      this.addToWishlist(product.id);
+    }
+  }
+
+  addToWishlist(productId: number): void {
+    this.wishlistService.addToWishlist(productId).subscribe(
+      () => {
+        this.wishlistProductIds.add(productId);
+        this.toast.success('Product added to wishlist');
+      },
+      error => {
+        console.error('Error adding to wishlist:', error);
+        
+        // Check if the error contains a login required message
+        if (error.status === 401 || (error.error && error.error.message === 'Please login to add items to wishlist')) {
+          this.toast.info('Please login to add items to wishlist');
+        } else {
+          this.toast.error('Failed to add product to wishlist');
+        }
+      }
+    );
+  }
+
+  removeFromWishlist(productId: number): void {
+    this.wishlistService.removeFromWishlist(productId).subscribe(
+      () => {
+        this.wishlistProductIds.delete(productId);
+        this.toast.success('Product removed from wishlist');
+      },
+      error => {
+        console.error('Error removing from wishlist:', error);
+        this.toast.error('Failed to remove product from wishlist');
+      }
+    );
   }
 
   goBack(): void {
     this.router.navigate(['/products']);
   }
+  
 }
