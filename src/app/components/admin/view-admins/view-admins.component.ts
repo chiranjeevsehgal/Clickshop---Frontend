@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminServiceService } from '../../../services/admin/admin-service.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 @Component({
   selector: 'app-view-admins',
@@ -23,7 +24,10 @@ export class ViewAdminsComponent implements OnInit {
   
   Math = Math; // Make Math available in the template
 
-  constructor(private adminService: AdminServiceService) { }
+  constructor(
+    private adminService: AdminServiceService,
+    private toast:HotToastService
+  ) { }
 
   ngOnInit(): void {
     this.loadAdmins();
@@ -41,7 +45,7 @@ export class ViewAdminsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading admins:', error);
-        this.errorMessage = 'Failed to load admins. Please try again.';
+        this.toast.error('Failed to load admins. Please try again.')
         this.isLoading = false;
       }
     });
@@ -72,25 +76,18 @@ export class ViewAdminsComponent implements OnInit {
   demoteToUser(admin: any): void {
     this.adminService.demoteToUser(admin.username).subscribe({
       next: () => {
-        this.successMessage = `Admin ${admin.name} has been demoted successfully`;
-        
+        // this.toast.success(`Admin ${admin.name} has been demoted successfully.`)
+        this.toast.success(`Admin has been demoted successfully!`)
         // Remove admin from the list
         this.admins = this.admins.filter(a => a.id !== admin.id);
         this.filterAdmins();
         
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
+        
       },
       error: (error) => {
         console.error('Error demoting admin:', error);
-        this.errorMessage = 'Failed to demote admin. Please try again.';
+        this.toast.error('Failed to demote admin. Please try again.')
         
-        // Clear error message after 3 seconds
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000);
       }
     });
   }

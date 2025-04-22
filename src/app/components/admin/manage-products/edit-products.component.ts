@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AdminServiceService } from '../../../services/admin/admin-service.service';
 import { GeminiService } from '../../../services/util/gemini.service';
 import { ProductServiceService } from '../../../services/productService/product-service.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 @Component({
   selector: 'app-edit-products',
@@ -30,7 +31,8 @@ export class EditProductsComponent {
     private router: Router,
     private adminService: AdminServiceService,
     private productService: ProductServiceService,
-    private geminiService: GeminiService
+    private geminiService: GeminiService,
+    private toast:HotToastService
   ) {
     // Initialize form with empty values and validators
     this.productForm = this.fb.group({
@@ -77,7 +79,7 @@ export class EditProductsComponent {
       },
       error: (error) => {
         console.error('Error loading product:', error);
-        this.errorMessage = 'Failed to load product. Please try again.';
+        this.toast.error('Failed to load product. Please try again.')
         this.isLoading = false;
       }
     });
@@ -92,7 +94,7 @@ export class EditProductsComponent {
       },
       error: (error) => {
         console.error('Error loading categories:', error);
-        this.errorMessage = 'Failed to load categories. Please try again.';
+        this.toast.error('Failed to load categories. Please try again.')
         this.isCategoryLoading = false;
       }
     });
@@ -116,8 +118,6 @@ export class EditProductsComponent {
     }
 
     this.isSubmitting = true;
-    this.errorMessage = '';
-    this.successMessage = '';
 
     const productData = this.productForm.value;
 
@@ -130,7 +130,7 @@ export class EditProductsComponent {
       // Create new product
       this.adminService.addProduct(productData).subscribe({
         next: (response) => {
-          this.successMessage = 'Product added successfully!';
+          this.toast.success('Product added successfully!')
           this.isSubmitting = false;
 
           // Navigate to product list after a short delay
@@ -140,7 +140,7 @@ export class EditProductsComponent {
         },
         error: (error) => {
           console.error('Error adding product:', error);
-          this.errorMessage = error.error || 'Failed to add product. Please try again.';
+          this.toast.error(error.error || `Failed to add product. Please try again.`)
           this.isSubmitting = false;
         }
       });
@@ -148,7 +148,7 @@ export class EditProductsComponent {
       // Update existing product
       this.adminService.updateProduct(this.productId, productData).subscribe({
         next: (response) => {
-          this.successMessage = 'Product updated successfully!';
+          this.toast.success('Product updated successfully!')
           this.isSubmitting = false;
 
           // Optionally navigate back to product list after a short delay
@@ -158,7 +158,7 @@ export class EditProductsComponent {
         },
         error: (error) => {
           console.error('Error updating product:', error);
-          this.errorMessage = error.error || 'Failed to update product. Please try again.';
+          this.toast.error(error.error || `Failed to update product. Please try again.`)
           this.isSubmitting = false;
         }
       });
@@ -186,8 +186,7 @@ export class EditProductsComponent {
 
     if (!name) {
       // Optionally show an error if no product name is provided
-      this.errorMessage = 'Please enter a product name before generating a description';
-      setTimeout(() => this.errorMessage = '', 3000);
+      this.toast.error(`Please enter a product name before generating a description.`)
       return;
     }
 
@@ -226,7 +225,7 @@ export class EditProductsComponent {
       })
       .catch(error => {
         console.error('Error generating description:', error);
-        this.errorMessage = 'Failed to generate description. Please try again.';
+        this.toast.error('Failed to generate description. Please try again.')
         this.isGeneratingDescription = false;
       });
   }

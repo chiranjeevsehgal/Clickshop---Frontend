@@ -23,6 +23,7 @@ import { TokenInterceptorComponent } from './components/util/token-interceptor/t
 import { HomeComponent } from './components/user/home/home.component';
 import { FeaturedproductsComponent } from './components/user/featuredproducts/featuredproducts.component';
 import { RecentproductsComponent } from './components/user/recentproducts/recentproducts.component';
+import { ReportsComponent } from './components/admin/reports/reports.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -51,6 +52,7 @@ const routes: Routes = [
       { path: 'viewproducts', component: ViewProductsComponent },
       { path: 'viewproducts/edit/:id', component: EditProductsComponent },
       { path: 'viewproducts/add', component: EditProductsComponent },
+      { path: 'reports', component: ReportsComponent },
       { path: 'vieworders', component: OrderManageComponent  },
       { path: 'vieworders/:id', component: OrderDetailComponent }
     ]

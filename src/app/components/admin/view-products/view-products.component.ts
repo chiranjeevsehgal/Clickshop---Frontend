@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminServiceService } from '../../../services/admin/admin-service.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 
 @Component({
@@ -34,7 +35,8 @@ export class ViewProductsComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private adminService: AdminServiceService
+    private adminService: AdminServiceService,
+    private toast:HotToastService
   ) { }
 
   ngOnInit(): void {
@@ -52,7 +54,7 @@ export class ViewProductsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading products:', error);
-        this.errorMessage = 'Failed to load products. Please try again.';
+        this.toast.error('Failed to load products. Please try again.')
         this.isLoading = false;
       }
     });
@@ -127,27 +129,17 @@ export class ViewProductsComponent implements OnInit {
         this.products = this.products.filter(p => p.id !== this.productToDelete.id);
         this.filterProducts(); // This will also update displayedProducts
         
-        // Show success message
-        this.successMessage = `Product "${this.productToDelete.name}" has been deleted successfully`;
-        
+        this.toast.success(`Product "${this.productToDelete.name}" has been deleted successfully`)
         // Reset modal state
         this.showDeleteModal = false;
         this.productToDelete = null;
         
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
       },
       error: (error) => {
         console.error('Error deleting product:', error);
-        this.errorMessage = 'Failed to delete product. Please try again.';
+        this.toast.error('Failed to delete product. Please try again.')
         this.showDeleteModal = false;
         
-        // Clear error message after 3 seconds
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000);
       }
     });
   }

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminServiceService } from '../../../services/admin/admin-service.service';
 import { AuthService } from '../../../services/authService/auth.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 @Component({
   selector: 'app-view-users',
@@ -25,7 +26,10 @@ export class ViewUsersComponent {
   
   Math = Math; // Make Math available in the template
 
-  constructor(private adminService: AdminServiceService) { }
+  constructor(
+    private adminService: AdminServiceService,
+    private toast:HotToastService
+  ) { }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -44,7 +48,7 @@ export class ViewUsersComponent {
       },
       error: (error) => {
         console.error('Error loading users:', error);
-        this.errorMessage = 'Failed to load users. Please try again.';
+        this.toast.error(`Failed to load users. Please try again.`)
         this.isLoading = false;
       }
     });
@@ -75,25 +79,18 @@ export class ViewUsersComponent {
   promoteToAdmin(user: any): void {
     this.adminService.promoteToAdmin(user.username).subscribe({
       next: () => {
-        this.successMessage = `User ${user.name} has been promoted to admin successfully`;
-        
+        // this.toast.success(`User ${user.name} has been promoted to admin successfully!`)
+        this.toast.success(`User has been promoted successfully!`)
         // Remove user from the list since they're now an admin
         this.users = this.users.filter(u => u.id !== user.id);
         this.filterUsers();
         
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
+        
       },
       error: (error) => {
         console.error('Error promoting user:', error);
-        this.errorMessage = 'Failed to promote user. Please try again.';
+        this.toast.error('Failed to promote user. Please try again.')
         
-        // Clear error message after 3 seconds
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000);
       }
     });
   }
@@ -102,8 +99,7 @@ export class ViewUsersComponent {
     this.adminService.activateUser(user.id).subscribe({
       next: () => {
         user.status = 'ACTIVE';
-        this.successMessage = `User ${user.name} has been activated`;
-        this.clearMessageAfterDelay();
+        this.toast.success(`User ${user.name} has been activated!`)
       },
       error: err => {
         console.error('Activation failed', err);
@@ -115,19 +111,12 @@ export class ViewUsersComponent {
     this.adminService.deactivateUser(user.id).subscribe({
       next: () => {
         user.status = 'INACTIVE';
-        this.successMessage = `User ${user.name} has been deactivated`;
-        this.clearMessageAfterDelay();
+        this.toast.success(`User ${user.name} has been deactivated!`)
       },
       error: err => {
         console.error('Deactivation failed', err);
       }
     });
-  }
-
-  private clearMessageAfterDelay(): void {
-    setTimeout(() => {
-      this.successMessage = '';
-    }, 3000);
   }
 
   // Pagination methods

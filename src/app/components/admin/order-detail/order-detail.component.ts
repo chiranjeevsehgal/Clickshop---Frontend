@@ -4,6 +4,7 @@ import { AdminServiceService } from '../../../services/admin/admin-service.servi
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Order } from '../../../models/Order';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 @Component({
   selector: 'app-order-detail',
@@ -23,8 +24,8 @@ export class OrderDetailComponent implements OnInit {
 
   // Status update modal
   showStatusModal: boolean = false;
-  newStatus: string | null = null; // Changed to null to handle the default option correctly
-  statusNotes: string = ''; // Added for optional notes
+  newStatus: string | null = null;
+  statusNotes: string = ''; 
   isUpdating: boolean = false;
 
   // Cancel order modal
@@ -34,7 +35,8 @@ export class OrderDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private orderService: AdminServiceService
+    private orderService: AdminServiceService,
+    private toast:HotToastService
   ) { }
 
   ngOnInit(): void {
@@ -64,7 +66,7 @@ export class OrderDetailComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading order details:', error);
-        this.errorMessage = 'Failed to load order details. Please try again.';
+        this.toast.error('Failed to load order details. Please try again.')
         this.isLoading = false;
       }
     });
@@ -109,37 +111,22 @@ export class OrderDetailComponent implements OnInit {
     if (!this.newStatus) return;
 
     this.isUpdating = true;
-    this.errorMessage = '';
-    this.successMessage = '';
 
     this.orderService.updateOrderStatus(this.orderId, this.newStatus).subscribe({
       next: (response) => {
         // Recreate the timeline
         this.createOrderTimeline();
 
-        this.successMessage = `Order status updated to ${this.newStatus}`;
+        this.toast.success(`Order status updated to ${this.newStatus}`)
         this.isUpdating = false;
         this.closeStatusModal();
 
-        // Clear success message after 3 seconds
-        window.location.reload();
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
       },
       error: (error) => {
         console.error('Error updating order status:', error);
-        this.errorMessage = error.error?.message || 'Failed to update order status. Please try again.';
+        this.toast.error(error.error?.message || 'Failed to update order status. Please try again.')
         this.isUpdating = false;
 
-        // Keep the modal open to let the user try again
-        // Or close the modal depending on your UX preference
-        // this.closeStatusModal();
-
-        // Clear error message after 3 seconds
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000);
       }
     });
   }
@@ -161,26 +148,17 @@ export class OrderDetailComponent implements OnInit {
         // Recreate the timeline
         this.createOrderTimeline();
 
-        this.successMessage = 'Order has been cancelled';
+        this.toast.success('Order has been cancelled!')
         this.isCancelling = false;
         this.closeCancelModal();
 
-        // Clear success message after 3 seconds
-        window.location.reload();
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
       },
       error: (error) => {
         console.error('Error cancelling order:', error);
-        this.errorMessage = error.error?.message || 'Failed to cancel order. Please try again.';
+        this.toast.error(error.error?.message || 'Failed to cancel order. Please try again.')
         this.isCancelling = false;
         this.closeCancelModal();
 
-        // Clear error message after 3 seconds
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000);
       }
     });
   }

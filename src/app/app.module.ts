@@ -35,6 +35,7 @@ import { OtpInputComponent } from './components/reusable/otp-input/otp-input.com
 import { HomeComponent } from './components/user/home/home.component';
 import { FeaturedproductsComponent } from './components/user/featuredproducts/featuredproducts.component';
 import { RecentproductsComponent } from './components/user/recentproducts/recentproducts.component';
+import { ReportsComponent } from './components/admin/reports/reports.component';
 
 @NgModule({
   declarations: [
@@ -65,6 +66,7 @@ import { RecentproductsComponent } from './components/user/recentproducts/recent
     HomeComponent,
     FeaturedproductsComponent,
     RecentproductsComponent,
+    ReportsComponent,
 
   ],
   imports: [
