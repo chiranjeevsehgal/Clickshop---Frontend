@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { catchError, Observable } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { Product } from '../../models/Product';
 
 @Injectable({
@@ -28,13 +28,40 @@ export class ProductServiceService {
     });
   }
 
+  getRecentProducts(): Observable<Product[]> {
+    return this.getAllProducts().pipe(
+      map(products => {
+        return products
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      })
+    );
+  }
+  
+  getFeaturedProducts(): Observable<Product[]> {
+    return this.getAllProducts().pipe(
+      map(products => products.filter(product => product.featured === true))
+    );
+    // return this.http.get<Product[]>(`${this.apiUrl}/products/featured`)
+    //   .pipe(
+    //     catchError(error => {
+    //       console.error('Error fetching featured products:', error);
+
+    //       if (error.status === 404) {
+
+    //       }
+    //       return throwError(() => error);
+    //     })
+    //   );
+  }
+
+
   getCategories(): Observable<string[]> {
     const headers = this.token
       ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
       : new HttpHeaders();
 
     return this.http.get<string[]>(`${this.apiUrl}/product/categories`, { headers, withCredentials: true })
-      
+
   }
 
   getPopularProducts(limit: number = 8): Observable<Product[]> {
@@ -43,7 +70,7 @@ export class ProductServiceService {
       ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
       : new HttpHeaders();
     return this.http.get<Product[]>(`${this.apiUrl}/product`, { params, headers, withCredentials: true })
-      
+
   }
 
   getProductById(id: number): Observable<Product> {

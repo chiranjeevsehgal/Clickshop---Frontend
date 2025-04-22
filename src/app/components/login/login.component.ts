@@ -16,10 +16,13 @@ export class LoginComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
   showPassword = false;
-  returnUrl: string = '/products';
+  returnUrl: string = '/home';
 
   ngOnInit(): void {
     this.loginCheck();
+
+    
+    
   }
 
   constructor(
@@ -35,7 +38,7 @@ export class LoginComponent implements OnInit {
       rememberMe: [false]
     });
 
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
   }
 
   togglePasswordVisibility() {
@@ -48,7 +51,7 @@ export class LoginComponent implements OnInit {
       if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
         this.router.navigate(['/admin/dashboard']);
       } else {
-        this.router.navigate(['/products']);
+        this.router.navigate(['/home']);
       }
     }
     
@@ -72,6 +75,13 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(loginData).subscribe({
       next: (response: any) => {
+
+        // Check user status first
+        if (response.status !== 'ACTIVE') {
+          this.toast.error("Your account is currently inactive. Please contact our admin team.");
+          return;
+        }
+
         // Handle successful login
         console.log('Login success:', response);
         this.toast.success("Succesfully logged in")

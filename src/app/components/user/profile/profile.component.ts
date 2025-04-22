@@ -60,6 +60,8 @@ export class ProfileComponent implements OnInit {
       next: (userData) => {
         this.user = userData;
         this.isLoading = false;
+        console.log(this.user);
+        
         // Initialize form with user data
         this.profileForm.patchValue({
           name: this.user.name,

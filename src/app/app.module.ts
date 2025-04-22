@@ -32,7 +32,9 @@ import { GeminiAssistantComponent } from './components/util/gemini-assistant/gem
 import { LucideAngularModule, Bot } from 'lucide-angular';
 import { TokenInterceptorComponent } from './components/util/token-interceptor/token-interceptor.component';
 import { OtpInputComponent } from './components/reusable/otp-input/otp-input.component';
-import { CategoriesComponent } from './components/user/categories/categories.component';
+import { HomeComponent } from './components/user/home/home.component';
+import { FeaturedproductsComponent } from './components/user/featuredproducts/featuredproducts.component';
+import { RecentproductsComponent } from './components/user/recentproducts/recentproducts.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +62,9 @@ import { CategoriesComponent } from './components/user/categories/categories.com
     GeminiAssistantComponent,
     TokenInterceptorComponent,
     OtpInputComponent,
-    CategoriesComponent,
+    HomeComponent,
+    FeaturedproductsComponent,
+    RecentproductsComponent,
 
   ],
   imports: [

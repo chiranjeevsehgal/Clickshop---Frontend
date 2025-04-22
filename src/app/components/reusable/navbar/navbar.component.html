@@ -1,134 +1,176 @@
-<!-- Modern Navigation Bar with Blue Background -->
-<nav class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg sticky top-0 z-50">
+<nav class="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
   <div class="container mx-auto px-4 py-3">
     <div class="flex justify-between items-center">
       <!-- Logo Section -->
-      <a href="/home" class="flex items-center space-x-2">
-        <div class="bg-white/15 backdrop-blur-sm rounded-lg w-10 h-10 flex items-center justify-center shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-          </svg>
+      <a href="/home" class="flex items-center space-x-3">
+        <div class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <span class="inline-block">ClickShop</span>
         </div>
-        <div class="text-xl font-bold">ClickShop</div>
       </a>
 
       <!-- Main Navigation & Actions -->
-      <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
+      <div class="flex-1 flex justify-center">
         <!-- Desktop Navigation Links -->
-        <div class="hidden md:flex items-center space-x-6 mr-4">
-          
-          <a href="/home" class="font-medium text-white hover:text-indigo-200 transition-colors">Home</a>
-          <a href="/products" class="font-medium text-white hover:text-indigo-200 transition-colors">Products</a>
-          
-          <!-- Protected links - Only show to logged in users -->
-          <ng-container *ngIf="isLoggedIn()">
-            <a href="/profile" class="font-medium text-white hover:text-indigo-200 transition-colors">Profile</a>
-          </ng-container>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/home" [ngClass]="{
+            'border-b-2 border-gray-900 dark:border-white': isActive('/home')
+          }"
+            class="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors text-sm uppercase tracking-wide">Home</a>
+          <a href="/products" [ngClass]="{
+            'border-b-2 border-gray-900 dark:border-white': isActive('/products')
+          }"
+            class="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors text-sm uppercase tracking-wide">Products</a>
+          <a href="/featured" [ngClass]="{
+            'border-b-2 border-gray-900 dark:border-white': isActive('/featured')
+          }"
+            class="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors text-sm uppercase tracking-wide">Featured</a>
+          <a href="/newlyadded" [ngClass]="{
+            'border-b-2 border-gray-900 dark:border-white': isActive('/newlyadded')
+          }"
+            class="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors text-sm uppercase tracking-wide">Latest
+            Drops</a>
+          <!-- <a href="/products?category=Men's" class="font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors text-sm uppercase tracking-wide" [ngClass]="{'text-gray-900 dark:text-white font-semibold': selectedCategory === 'Men\'s'}">Men's</a> -->
         </div>
-        
-        <!-- Mobile Menu Button - Only visible on small screens -->
-        <button class="md:hidden p-2 text-white hover:bg-indigo-500 rounded-full transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+      </div>
 
-        <!-- Cart Button -->
-        <a (click)="handleCartClick($event)" class="relative p-2 text-white hover:bg-indigo-500 rounded-full transition-colors cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          
-          <div *ngIf="isLoggedIn() && cartCount > -1" class="absolute -top-2 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
-            {{ cartCount }}
+      <div class="flex items-center space-x-5">
+        <!-- Search Button and Search Box -->
+        <div class="relative">
+          <!-- Search Button -->
+          <button (click)="toggleSearch()"
+            class="p-1 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+
+          <!-- Search Box (Hidden by default) -->
+          <div *ngIf="showSearch"
+            class="absolute right-0 top-10 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg p-2 z-20 border border-gray-200 dark:border-gray-700">
+            <form (submit)="submitSearch($event)">
+              <div class="flex">
+                <input type="text" [(ngModel)]="searchTerm" name="search" placeholder="Search products..."
+                  class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white"
+                  (keyup)="onSearchKeyup($event)" />
+                <button type="submit"
+                  class="bg-gray-100 dark:bg-gray-600 px-3 py-2 rounded-r-md border border-l-0 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 dark:text-gray-300" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
+            </form>
           </div>
-        </a>
+        </div>
 
-        <!-- Login button when user is not logged in -->
-        <ng-container *ngIf="!isLoggedIn()">
-          <button (click)="login()" class="flex items-center space-x-1 px-4 py-2 bg-white/15 hover:bg-white/25 text-white rounded-lg transition-all duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-            </svg>
-            <span class="hidden sm:inline-block">Login</span>
-          </button>
-        </ng-container>
-
-        <!-- User Dropdown - Only shown to logged in users -->
-        <div *ngIf="isLoggedIn()" class="relative group">
-          <button class="flex items-center space-x-1 p-2 hover:bg-indigo-500 rounded-full focus:outline-none transition-colors">
-            <div class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-sm font-bold">
-              U
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        <!-- User Button/Dropdown -->
+        <div class="relative" #userDropdown>
+          <!-- Show login button when not logged in -->
+          <button *ngIf="!isLoggedIn()" (click)="login()"
+            class="p-1 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </button>
-          
-          <!-- Dropdown Menu -->
-          <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 z-10 border border-gray-200 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-            
+        
+          <!-- User dropdown when logged in -->
+          <button *ngIf="isLoggedIn()" (click)="toggleUserDropdown($event)"
+            class="p-1 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </button>
+        
+          <!-- Dropdown Menu - Only visible when logged in -->
+          <div *ngIf="isLoggedIn() && isUserDropdownOpen"
+            class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg py-1 z-10 border border-gray-200 dark:border-gray-700"
+            (click)="$event.stopPropagation()">
             <!-- Account Menu Header -->
-            <div class="px-4 py-3 border-b border-gray-100">
-              <p class="text-sm text-gray-400">Signed in as</p>
-              <p class="text-sm font-medium text-gray-900 truncate" *ngIf="user">{{user.name}}</p>
+            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+              <p class="text-sm text-gray-400 dark:text-gray-500">Signed in as</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white truncate" *ngIf="user">{{user.name}}</p>
             </div>
-            
+        
             <!-- Profile -->
-            <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
               <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500 dark:text-gray-400" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Profile
               </div>
             </a>
-            
+        
             <!-- Orders -->
-            <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
               <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500 dark:text-gray-400" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 Orders
               </div>
             </a>
-            
-            <!-- Wishlist -->
-            <a (click)="handleWishlistClick($event)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-              <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                Wishlist
-              </div>
-            </a>
-            
-            <div class="border-t border-gray-100"></div>
-            
+        
             <!-- Logout -->
-            <button (click)="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+            <div class="border-t border-gray-100 dark:border-gray-700"></div>
+            <button (click)="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
               <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-red-500 dark:text-red-400" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
                 Logout
               </div>
             </button>
           </div>
         </div>
+
+        <!-- Wishlist Button -->
+        <div class="relative" *ngIf="isLoggedIn()">
+          <a (click)="handleWishlistClick($event)"
+            class="p-1 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </a>
+        </div>
+
+        <!-- Cart Button -->
+        <div class="relative">
+          <a (click)="handleCartClick($event)"
+            class="p-1 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors cursor-pointer">
+            <div class="flex flex-col mb-4">
+            <div *ngIf="isLoggedIn() && cartCount > -1"
+              class="ml-2 bg-black text-white text-[10px] font-medium rounded-full h-4 w-4 flex items-center justify-center">
+              {{ cartCount }}
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          </div>
+          </a>
+        </div>
+
       </div>
     </div>
   </div>
-  
-  <!-- Mobile Menu (Expanded) - This would be toggled with JavaScript -->
-  <div class="hidden md:hidden">
-    <div class="px-2 pt-2 pb-3 space-y-1 bg-indigo-700 border-t border-indigo-800">
-      <a href="/products" class="block px-3 py-2 rounded-lg text-white font-medium hover:bg-indigo-600 transition-colors">Home</a>
-      <ng-container *ngIf="isLoggedIn()">
-        <a href="/orders" class="block px-3 py-2 rounded-lg text-white font-medium hover:bg-indigo-600 transition-colors">Orders</a>
-        <a href="/profile" class="block px-3 py-2 rounded-lg text-white font-medium hover:bg-indigo-600 transition-colors">Profile</a>
-      </ng-container>
-    </div>
-  </div>
+
+
 </nav>

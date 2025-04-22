@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminServiceService } from '../../../services/admin/admin-service.service';
 import { GeminiService } from '../../../services/util/gemini.service';
+import { ProductServiceService } from '../../../services/productService/product-service.service';
 
 @Component({
   selector: 'app-edit-products',
@@ -19,13 +20,16 @@ export class EditProductsComponent {
   errorMessage: string = '';
   successMessage: string = '';
   productForm: FormGroup;
-  categories: string[] = ['Electronics', 'Clothing', 'Books', 'Home & Kitchen', 'Sports', 'Toys', 'Beauty', 'Health'];
+  categories: string[] = [];
+  isCategoryLoading: boolean = false;
+
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private adminService: AdminServiceService,
+    private productService: ProductServiceService,
     private geminiService: GeminiService
   ) {
     // Initialize form with empty values and validators
@@ -35,6 +39,7 @@ export class EditProductsComponent {
       price: [0, [Validators.required, Validators.min(0.01)]],
       stock: [0, [Validators.required, Validators.min(0)]],
       category: ['', Validators.required],
+      customCategory: [''],
       imageUrl: ['']
     });
   }
@@ -79,19 +84,27 @@ export class EditProductsComponent {
   }
 
   loadCategories(): void {
-    // This would fetch categories from the backend
-    // For now, we're using a static list
-    /*
-    this.adminService.getCategories().subscribe({
-      next: (categories) => {
+    this.isCategoryLoading = true;
+    this.productService.getCategories().subscribe({
+      next: (categories: string[]) => {
         this.categories = categories;
+        this.isCategoryLoading = false;
       },
       error: (error) => {
         console.error('Error loading categories:', error);
+        this.errorMessage = 'Failed to load categories. Please try again.';
+        this.isCategoryLoading = false;
       }
     });
-    */
   }
+
+  onCategoryChange(): void {
+    const selectedCategory = this.productForm.get('category')?.value;
+    if (selectedCategory !== 'Other') {
+      this.productForm.get('customCategory')?.setValue('');
+    }
+  }
+
 
   onSubmit(): void {
     if (this.productForm.invalid) {
@@ -108,13 +121,18 @@ export class EditProductsComponent {
 
     const productData = this.productForm.value;
 
+    if (productData.category === 'Other') {
+      productData.category = productData.customCategory?.trim();
+    }
+
+
     if (this.isNewProduct) {
       // Create new product
       this.adminService.addProduct(productData).subscribe({
         next: (response) => {
           this.successMessage = 'Product added successfully!';
           this.isSubmitting = false;
-          
+
           // Navigate to product list after a short delay
           setTimeout(() => {
             this.router.navigate(['/admin/viewproducts']);
@@ -132,7 +150,7 @@ export class EditProductsComponent {
         next: (response) => {
           this.successMessage = 'Product updated successfully!';
           this.isSubmitting = false;
-          
+
           // Optionally navigate back to product list after a short delay
           setTimeout(() => {
             this.router.navigate(['/admin/viewproducts']);
@@ -155,7 +173,7 @@ export class EditProductsComponent {
   goBack(): void {
     this.router.navigate(['/admin/viewproducts']);
   }
-  
+
   onDescriptionGenerated(description: string): void {
     this.productForm.patchValue({ description });
     this.productForm.get('description')?.markAsTouched();
@@ -165,29 +183,29 @@ export class EditProductsComponent {
     const name = this.productForm.get('name')?.value;
     const category = this.productForm.get('category')?.value;
     const currentDescription = this.productForm.get('description')?.value || '';
-    
+
     if (!name) {
       // Optionally show an error if no product name is provided
       this.errorMessage = 'Please enter a product name before generating a description';
       setTimeout(() => this.errorMessage = '', 3000);
       return;
     }
-    
+
     this.isGeneratingDescription = true;
-    
+
     // Create a prompt that includes product name, category, and any existing description content
     let enhancedPrompt = 'Generate a detailed product description for e-commerce';
-    
+
     enhancedPrompt += ` for a product named "${name}"`;
-    
+
     if (category) {
       enhancedPrompt += ` in the category "${category}"`;
     }
-    
+
     if (currentDescription.trim()) {
       enhancedPrompt += `. Use these details as reference: ${currentDescription}`;
     }
-    
+
     // Add specific instructions for the AI
     enhancedPrompt += `. The description should be:
     - Around 100-150 words
@@ -196,7 +214,7 @@ export class EditProductsComponent {
     - Include relevant details for this type of product
     - Avoid placeholder text or generic statements
     - Write in a professional tone`;
-    
+
     this.geminiService.getAiResponse(enhancedPrompt)
       .then(response => {
         // Clean up the response (remove quotes if present)

@@ -12,4 +12,5 @@ export interface Product {
     featured?: boolean;
     inStock: boolean;
     onSale?:boolean
+    createdAt?: any
   }

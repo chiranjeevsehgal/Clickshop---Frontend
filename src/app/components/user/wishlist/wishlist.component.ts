@@ -40,6 +40,8 @@ export class WishlistComponent implements OnInit {
       (data) => {
         this.wishlistItems = data;
         this.isLoading = false;
+        console.log(this.wishlistItems);
+        
       },
       (error) => {
         console.error('Error fetching wishlist:', error);

@@ -3,6 +3,7 @@ import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationEr
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/authService/auth.service';
 import { catchError, debounceTime, distinctUntilChanged, map, Observable, of, switchMap } from 'rxjs';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 @Component({
   selector: 'app-register',
@@ -23,7 +24,8 @@ export class RegisterComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toast:HotToastService
   ) {
     this.registerForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -183,12 +185,17 @@ export class RegisterComponent implements OnInit {
       next: (response: any) => {
         if (response.token) {
           localStorage.setItem('authToken', response.token);
-
+          console.log(response);
+          this.toast.success("You have been registered successfully, eager to serve you!")
           if (response.user) {
             localStorage.setItem('user', JSON.stringify(response.user));
+            localStorage.setItem('userId', response.user.id);
+            localStorage.setItem('role', response.user.role);
           }
+          
+          
         }
-
+        
         this.router.navigate(['/login'], {
           queryParams: { registered: 'true' }
         });

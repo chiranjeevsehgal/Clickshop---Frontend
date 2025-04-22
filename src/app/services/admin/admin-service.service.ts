@@ -59,7 +59,7 @@ export class AdminServiceService {
   }
 
   promoteToAdmin(userName: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/promote`, {userName}, {
+    return this.http.post(`${this.apiUrl}/promote`, { userName }, {
       withCredentials: true
     });
   }
@@ -73,7 +73,7 @@ export class AdminServiceService {
   }
 
   demoteToUser(userName: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/demote`, {userName}, {
+    return this.http.post(`${this.apiUrl}/demote`, { userName }, {
       withCredentials: true
     });
   }
@@ -90,7 +90,7 @@ export class AdminServiceService {
       })
     );
   }
-  
+
   /**
    * Get a single product by ID
    */
@@ -99,7 +99,7 @@ export class AdminServiceService {
       withCredentials: true
     });
   }
-  
+
   /**
    * Add a new product
    */
@@ -109,7 +109,7 @@ export class AdminServiceService {
       responseType: 'text'
     });
   }
-  
+
   /**
    * Update an existing product
    */
@@ -119,29 +119,29 @@ export class AdminServiceService {
       responseType: 'text'
     });
   }
-  
+
   /**
    * Delete a product
    */
   deleteProduct(productId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl_Product}/delete/${productId}`, {
       withCredentials: true,
-      responseType: 'text' 
+      responseType: 'text'
     });
   }
-  
+
   /**
    * Upload product image
    */
   uploadProductImage(productId: number, imageFile: File): Observable<any> {
     const formData = new FormData();
     formData.append('image', imageFile);
-    
+
     return this.http.post<any>(`${this.apiUrl_Product}/admin/products/${productId}/image`, formData, {
       withCredentials: true
     });
   }
-  
+
 
   // Order management
   getAllOrders(): Observable<any[]> {
@@ -159,12 +159,12 @@ export class AdminServiceService {
   updateOrderStatus(orderId: number, status: string): Observable<any> {
     console.log(status);
     console.log(orderId);
-    
+
     return this.http.put(`${this.apiUrl_Orders}/${orderId}/status`, { status }, {
       withCredentials: true
     });
   }
-  
+
   cancelOrder(orderId: number): Observable<any> {
     return this.http.put(`${this.apiUrl_Orders}/${orderId}/cancel`, {}, {
       withCredentials: true

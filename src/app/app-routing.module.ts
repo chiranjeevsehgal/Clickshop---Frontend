@@ -20,7 +20,9 @@ import { WishlistComponent } from './components/user/wishlist/wishlist.component
 import { RoleRedirectComponent } from './components/util/role-redirect/role-redirect.component';
 import { userGuard } from './guards/user.guard';
 import { TokenInterceptorComponent } from './components/util/token-interceptor/token-interceptor.component';
-import { CategoriesComponent } from './components/user/categories/categories.component';
+import { HomeComponent } from './components/user/home/home.component';
+import { FeaturedproductsComponent } from './components/user/featuredproducts/featuredproducts.component';
+import { RecentproductsComponent } from './components/user/recentproducts/recentproducts.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -28,12 +30,14 @@ const routes: Routes = [
   { path: 'intercept', component: TokenInterceptorComponent },
   { path: 'register', component: RegisterComponent,},
   { path: 'products', component: ProductsComponent, canActivate: [userGuard]},
+  { path: 'featured', component: FeaturedproductsComponent, canActivate: [userGuard] },
+  { path: 'newlyadded', component: RecentproductsComponent, canActivate: [userGuard] },
   { path: 'product/:id', component: ProductDetailComponent, canActivate: [userGuard] },
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard, userGuard] },
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard, userGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, userGuard] },
   { path: 'wishlist', component: WishlistComponent, canActivate: [AuthGuard, userGuard] },
-  { path: 'home', component: CategoriesComponent, canActivate: [AuthGuard, userGuard] },
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard, userGuard] },
   
   // Admin route
   {

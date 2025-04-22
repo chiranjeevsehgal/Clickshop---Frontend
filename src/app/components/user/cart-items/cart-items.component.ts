@@ -41,7 +41,7 @@ export class CartComponent implements OnInit {
   ngOnInit(): void {
     this.fetchCartItems();
     this.loadUserProfile();
-    this.fireConfetti()
+
   }
 
   loadUserProfile(): void {
@@ -62,15 +62,20 @@ export class CartComponent implements OnInit {
 
   fetchCartItems(): void {
     this.isLoading = true;
-    this.cartService.getCartItems().subscribe({
+    this.cartService.getCartItemsWithProductDetails().subscribe({
       next: (items) => {
         this.cartItems = items.map(item => ({
           ...item,
           subtotal: item.totalPrice,
           price: item.totalPrice / item.quantity
         }));
+        if (this.cartItems.length > 0) {
+          this.fireConfetti();
+        }
         this.calculateTotal();
         this.isLoading = false;
+        console.log(this.cartItems);
+
       },
       error: (err) => {
         console.error('Failed to fetch cart items:', err);
@@ -121,6 +126,10 @@ export class CartComponent implements OnInit {
       this.discountAmount = this.cartTotal * 0.1;
       this.discountRate = 0.1;
       this.discountApplied = true;
+    } else if (this.discountCode === 'WELCOME20') {
+      this.discountAmount = this.cartTotal * 0.2;
+      this.discountRate = 0.2;
+      this.discountApplied = true;
     } else {
       alert('Invalid discount code');
     }
@@ -163,9 +172,9 @@ export class CartComponent implements OnInit {
     this.cartService.createOrder(orderData).subscribe({
       next: (orderResponse) => {
         console.log(orderResponse);
-        this.initiatePayment(orderData,orderResponse);
-          console.log(orderData);
-          
+        this.initiatePayment(orderData, orderResponse);
+        console.log(orderData);
+
 
       },
       error: (err) => {
@@ -181,7 +190,7 @@ export class CartComponent implements OnInit {
     console.log(orderData);
     console.log("originalData");
     console.log(originalData);
- 
+
     const options = {
       key: 'rzp_test_nszEMOVRLAZUFz',
       amount: Math.round(originalData.amount), // Amount in paisa
@@ -229,7 +238,7 @@ export class CartComponent implements OnInit {
     };
 
     console.log(orderData);
-    
+
     this.razorpayService.verifyPayment(paymentData).subscribe({
       next: (verificationResponse) => {
 

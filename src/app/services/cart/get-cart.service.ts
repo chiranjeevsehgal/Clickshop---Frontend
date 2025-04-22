@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CartItem } from '../../models/CartItems';
-import { BehaviorSubject, catchError, map, Observable, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, forkJoin, map, Observable, switchMap, tap } from 'rxjs';
+import { ProductServiceService } from '../productService/product-service.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class CartService {
 
   private token = localStorage.getItem('authToken');
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private productservice: ProductServiceService) { }
 
   refreshCartCount(): void {
     this.getCartItems().subscribe(items => {
@@ -32,6 +33,25 @@ export class CartService {
 
     return this.http.get<CartItem[]>(`${this.apiUrl}/users/cartitems`, { headers, withCredentials: true });
   }
+  
+  getCartItemsWithProductDetails(): Observable<any[]> {
+    return this.getCartItems().pipe(
+      // Map through the cart items
+      switchMap((cartItems) => {
+        // Fetch the product details for each cart item
+        const productRequests = cartItems.map((item) =>
+          this.productservice.getProductById(item.productId).pipe(
+            // Combine the cart item with its product details
+            map((product) => ({ ...item, product }))
+          )
+        );
+
+        // Execute all the product fetch requests in parallel using forkJoin
+        return forkJoin(productRequests);
+      })
+    );
+  }
+
 
   updateQuantity(itemId: number, quantity: number): Observable<any> {
     const headers = this.token

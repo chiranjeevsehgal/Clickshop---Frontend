@@ -22,7 +22,14 @@ export class ProductsComponent implements OnInit {
   categories: string[] = [];
   selectedCategory: string = 'All';
   wishlistProductIds: Set<number> = new Set();
+  isLoading: boolean = true;
 
+  // Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 8;
+  totalPages: number = 1;
+  paginatedProducts: Product[] = [];
+  Math: any;
 
   constructor(
     private productService: ProductServiceService,
@@ -31,15 +38,20 @@ export class ProductsComponent implements OnInit {
     private router: Router,
     private toast: HotToastService,
     private route: ActivatedRoute,
-
   ) { }
 
   ngOnInit(): void {
-    this.loadProducts();
-    this.loadWishlist()
+    this.loadWishlist();
+    this.loadCategories();
 
     // Check for category parameter in URL
     this.route.queryParams.subscribe(params => {
+      if (params['page']) {
+        this.currentPage = +params['page'];
+      } else {
+        this.currentPage = 1;
+      }
+
       if (params['category']) {
         this.selectedCategory = params['category'];
         this.loadProductsByCategory(this.selectedCategory);
@@ -49,7 +61,28 @@ export class ProductsComponent implements OnInit {
 
       if (params['search']) {
         this.searchTerm = params['search'];
-        this.filteredProducts;
+        this.applyFilters();
+      }
+    });
+  }
+
+  clearFilter():void{
+    this.searchTerm = ''; 
+    this.selectedCategory = 'All'
+    this.router.navigate(['/products'], {
+      queryParams: {} 
+    });
+  }
+
+  loadCategories(): void {
+    this.isLoading = true;
+    this.productService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.isLoading = false;
       }
     });
   }
@@ -61,7 +94,10 @@ export class ProductsComponent implements OnInit {
     // Update URL with the selected category
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { category: category !== 'All' ? category : null },
+      queryParams: {
+        category: category !== 'All' ? category : null,
+        page: this.currentPage
+      },
       queryParamsHandling: 'merge'
     });
 
@@ -73,7 +109,7 @@ export class ProductsComponent implements OnInit {
     this.productService.getProductsByCategory(category).subscribe({
       next: (products) => {
         this.products = products;
-        this.filteredProduct = [...products];
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
@@ -82,7 +118,6 @@ export class ProductsComponent implements OnInit {
       }
     });
   }
-
 
   loadProducts(): void {
     this.loading = true;
@@ -97,9 +132,8 @@ export class ProductsComponent implements OnInit {
           }
         });
         this.categories = Array.from(uniqueCategories);
+        this.applyFilters();
         this.loading = false;
-        console.log(this.products);
-
       },
       error: (error) => {
         console.error('Error fetching products:', error);
@@ -108,6 +142,8 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+
+
   filterProducts(): void {
     if (!this.searchTerm.trim()) {
       this.filteredProduct = [...this.products];
@@ -115,19 +151,93 @@ export class ProductsComponent implements OnInit {
     }
 
     const term = this.searchTerm.toLowerCase().trim();
-    this.filteredProduct = this.products.filter(product => 
-      product.name.toLowerCase().includes(term) || 
+    this.filteredProduct = this.products.filter(product =>
+      product.name.toLowerCase().includes(term) ||
       product.description.toLowerCase().includes(term)
     );
   }
 
-  get filteredProducts(): Product[] {
-    return this.products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+  applyFilters(): void {
+    // Filter products by search term and category
+    this.filteredProduct = this.products.filter(product => {
+      const matchesSearch = !this.searchTerm.trim() ||
+        product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         product.description.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchesCategory = this.selectedCategory === 'All' || product.category === this.selectedCategory;
       return matchesSearch && matchesCategory;
     });
+
+    // Calculate total pages
+    this.totalPages = Math.ceil(this.filteredProduct.length / this.pageSize);
+
+    // Ensure current page is within bounds
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = Math.max(1, this.totalPages);
+      this.updatePageUrl();
+    }
+
+    // Paginate the filtered products
+    this.paginateProducts();
+  }
+
+  paginateProducts(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = Math.min(startIndex + this.pageSize, this.filteredProduct.length);
+    this.paginatedProducts = this.filteredProduct.slice(startIndex, endIndex);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) {
+      return;
+    }
+
+    this.currentPage = page;
+    this.updatePageUrl();
+    this.paginateProducts();
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  updatePageUrl(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        page: this.currentPage,
+        category: this.selectedCategory !== 'All' ? this.selectedCategory : null,
+        search: this.searchTerm || null
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  getPageNumbers(): number[] {
+    const totalPageCount = this.totalPages;
+    const currentPage = this.currentPage;
+    const visiblePages = 3;
+
+    let startPage: number;
+    let endPage: number;
+
+    if (totalPageCount <= visiblePages) {
+      // Show all pages
+      startPage = 1;
+      endPage = totalPageCount;
+    } else {
+      // Calculate start and end pages
+      if (currentPage <= Math.ceil(visiblePages / 2)) {
+        startPage = 1;
+        endPage = visiblePages;
+      } else if (currentPage + Math.floor(visiblePages / 2) >= totalPageCount) {
+        startPage = totalPageCount - visiblePages + 1;
+        endPage = totalPageCount;
+      } else {
+        startPage = currentPage - Math.floor(visiblePages / 2);
+        endPage = currentPage + Math.ceil(visiblePages / 2) - 1;
+      }
+    }
+
+    return Array.from({ length: (endPage - startPage + 1) }, (_, i) => startPage + i);
   }
 
   addToCart(product: Product): void {
@@ -183,7 +293,6 @@ export class ProductsComponent implements OnInit {
   toggleWishlist(event: Event, product: any): void {
     event.stopPropagation(); // Prevent event bubbling
 
-
     if (this.isInWishlist(product.id)) {
       this.removeFromWishlist(product.id);
     } else {
@@ -222,7 +331,6 @@ export class ProductsComponent implements OnInit {
       }
     );
   }
-
 
   placeholderProduct: string = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi5YNRPU4910yPsW1yobc1J7of1kMM-pww1Qf5lkpKePvG1-3GeRFJPh0U9w0FLoeojueyp4HtPxcqWkGJOudVgEv3tpEnJQM9-Ia-eemENMJTFpTFm6WeZiiB2nBRDIwl9PeRGvsjEJTI/s1600/placeholder-image.jpg'
 
