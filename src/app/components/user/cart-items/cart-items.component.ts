@@ -69,9 +69,9 @@ export class CartComponent implements OnInit {
           subtotal: item.totalPrice,
           price: item.totalPrice / item.quantity
         }));
-        if (this.cartItems.length > 0) {
-          this.fireConfetti();
-        }
+        // if (this.cartItems.length > 0) {
+        //   this.fireConfetti();
+        // }
         this.calculateTotal();
         this.isLoading = false;
         console.log(this.cartItems);

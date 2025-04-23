@@ -17,9 +17,7 @@ export class AuthGuard implements CanActivate {
   ): Observable<boolean> {
     // First check if we have a token
     if (!this.authService.getToken()) {
-      // this.router.navigate(['/login'], { 
-      //   queryParams: { returnUrl: state.url }
-      // });
+      this.router.navigate(['/login']);
       return of(false);
     }
     
@@ -32,7 +30,7 @@ export class AuthGuard implements CanActivate {
         console.error('Auth guard check failed:', error);
         
         // If error 401/403, redirect to login
-        // this.router.navigate(['/login'], { 
+        // this.router.navigate(['/login']), { 
         //   queryParams: { returnUrl: state.url }
         // });
         return of(false);

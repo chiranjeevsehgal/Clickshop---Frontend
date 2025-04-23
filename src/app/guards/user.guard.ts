@@ -21,7 +21,7 @@ export class userGuard implements CanActivate {
     }
 
     if (this.authService.isLoggedIn()) {
-      // Logged in but not USER role (probably admin)
+      
       this.router.navigate(['/admin/dashboard']);
     } else {
       // Not logged in

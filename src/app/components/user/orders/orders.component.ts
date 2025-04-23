@@ -6,7 +6,7 @@ import { Order } from '../../../models/Order';
 import { OrdersService } from '../../../services/user/orders.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
+import { ProfileService } from '../../../services/user/profile.service';
 @Component({
   selector: 'app-orders',
   standalone: false,
@@ -16,6 +16,7 @@ import autoTable from 'jspdf-autotable';
 
 export class OrdersComponent implements OnInit {
   orders: Order[] = [];
+  user: any = null;
   isLoading: boolean = true;
   errorMessage: string = '';
   expandedOrderId: number | null = null;
@@ -25,13 +26,29 @@ export class OrdersComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private orderService: OrdersService
+    private orderService: OrdersService,
+    private userService: ProfileService
   ) { }
 
   ngOnInit(): void {
     this.fetchOrders();
-
+    this.loadUserProfile();
   }
+
+  loadUserProfile(): void {
+    this.userService.getUserProfile().subscribe({
+      next: (userData) => {
+        this.user = userData; 
+        console.log(this.user);
+        console.log(this.user?.phone);
+      },
+      
+      error: (error) => {
+        console.error('Error loading profile:', error);
+      }
+    });
+  }
+
 
   fetchOrders(): void {
     this.isLoading = true;
@@ -294,10 +311,12 @@ export class OrdersComponent implements OnInit {
     doc.setFontSize(11);
     doc.text('BILL TO', 15, 92);
 
-    const customerName = order.items[0]?.userDetails?.name || 'N/A';
-    const customerContact = order.items[0]?.userDetails?.contact || 'N/A';
-    const customerEmail = order.items[0]?.userDetails?.email || 'N/A';
-    const customerAddress = order.deliveryAddress || 'N/A';
+    const customerName = this.user?.name || 'N/A';
+    const customerContact = this.user?.phone || 'N/A';
+    console.log(customerContact);
+    console.log(this.user?.phone);
+    const customerEmail = this.user?.email || 'N/A';
+    const customerAddress = this.user?.address || 'N/A';
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
