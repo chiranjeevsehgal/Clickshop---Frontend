@@ -30,15 +30,15 @@ const routes: Routes = [
   { path: '', component: RoleRedirectComponent },
   { path: 'intercept', component: TokenInterceptorComponent },
   { path: 'register', component: RegisterComponent,},
-  { path: 'products', component: ProductsComponent, canActivate: [userGuard]},
-  { path: 'featured', component: FeaturedproductsComponent, canActivate: [userGuard] },
-  { path: 'newlyadded', component: RecentproductsComponent, canActivate: [userGuard] },
-  { path: 'product/:id', component: ProductDetailComponent, canActivate: [userGuard] },
+  { path: 'products', component: ProductsComponent},
+  { path: 'featured', component: FeaturedproductsComponent},
+  { path: 'newlyadded', component: RecentproductsComponent},
+  { path: 'product/:id', component: ProductDetailComponent},
+  { path: 'home', component: HomeComponent},
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard, userGuard] },
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard, userGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, userGuard] },
   { path: 'wishlist', component: WishlistComponent, canActivate: [AuthGuard, userGuard] },
-  { path: 'home', component: HomeComponent, canActivate: [AuthGuard, userGuard] },
   
   // Admin route
   {

@@ -6,6 +6,7 @@ import { CartService } from '../../../services/cart/get-cart.service';
 import { NavigationStart, Router } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { HotToastService } from '@ngxpert/hot-toast';
+import { AuthService } from '../../../services/authService/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +28,7 @@ export class HomeComponent implements OnInit {
   constructor(
     private productService: ProductServiceService,
     private wishlistService: WishlistService,
+    private authService: AuthService,
     private cartService: CartService,
     private router: Router,
     private toast: HotToastService,
@@ -39,7 +41,9 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadWishlist();
+    if (this.authService.isLoggedIn()) {
+      this.loadWishlist();
+    }
     this.loadCategories();
   }
 
@@ -127,6 +131,11 @@ export class HomeComponent implements OnInit {
   }
 
   addToWishlist(productId: number): void {
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info("Please login to add items to wishlist!")
+      return
+    }
+
     this.wishlistService.addToWishlist(productId).subscribe(
       () => {
         this.wishlistProductIds.add(productId);
@@ -146,6 +155,11 @@ export class HomeComponent implements OnInit {
   }
 
   removeFromWishlist(productId: number): void {
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info("Please login to add items to wishlist!")
+      return
+    }
+
     this.wishlistService.removeFromWishlist(productId).subscribe(
       () => {
         this.wishlistProductIds.delete(productId);
@@ -160,6 +174,10 @@ export class HomeComponent implements OnInit {
 
   toggleWishlist(event: Event, product: any): void {
     event.stopPropagation(); // Prevent event bubbling
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info("Please login to use wishlist features!")
+      return
+    }
 
     if (this.isInWishlist(product.id)) {
       this.removeFromWishlist(product.id);
@@ -169,6 +187,11 @@ export class HomeComponent implements OnInit {
   }
 
   addToCart(product: Product): void {
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info("Please login to add items to cart!")
+      return
+    }
+
     this.productService.addToCart(product).pipe(
       catchError((error) => {
         console.error('Error adding to cart:', error);

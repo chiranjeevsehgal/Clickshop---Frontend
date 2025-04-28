@@ -17,7 +17,7 @@ export class NavbarComponent implements OnInit {
   user: any = null
   selectedCategory: string = 'All';
   searchTerm: string = '';
-  showSearch: boolean = false;  
+  showSearch: boolean = false;
 
   constructor(
     private cartService: CartService,
@@ -32,9 +32,10 @@ export class NavbarComponent implements OnInit {
     // Only refresh cart count if user is logged in
     if (this.isLoggedIn()) {
       this.cartService.refreshCartCount();
+      this.loadUserProfile();
     }
-    this.loadUserProfile();
-    
+
+
     this.cartService.cartCount$.subscribe(count => {
       this.cartCount = count;
     });
@@ -45,7 +46,7 @@ export class NavbarComponent implements OnInit {
       } else {
         this.selectedCategory = '';
       }
-      
+
       if (params['search']) {
         this.searchTerm = params['search'];
       }
@@ -58,7 +59,7 @@ export class NavbarComponent implements OnInit {
 
   toggleSearch(): void {
     this.showSearch = !this.showSearch;
-    
+
     // Auto-focus on the search input when opened
     if (this.showSearch) {
       setTimeout(() => {
@@ -72,20 +73,20 @@ export class NavbarComponent implements OnInit {
 
   submitSearch(event: Event): void {
     event.preventDefault();
-    
+
     if (!this.searchTerm.trim()) {
       return;
     }
-    
+
     // Navigate to products page with search query parameter
     this.router.navigate(['/products'], {
-      queryParams: { 
+      queryParams: {
         search: this.searchTerm,
         category: this.selectedCategory || null
       },
       queryParamsHandling: 'merge'
     });
-    
+
     // Close the search box after submitting
     this.showSearch = false;
     this.searchTerm = ''
@@ -96,7 +97,7 @@ export class NavbarComponent implements OnInit {
     if (event.key === 'Escape') {
       this.showSearch = false;
     }
-    
+
     // Submit on enter key
     if (event.key === 'Enter') {
       this.submitSearch(event);
@@ -107,10 +108,10 @@ export class NavbarComponent implements OnInit {
   loadUserProfile(): void {
     this.userService.getUserProfile().subscribe({
       next: (userData) => {
-        this.user = userData; 
+        this.user = userData;
         console.log(this.user);
       },
-      
+
       error: (error) => {
         console.error('Error loading profile:', error);
       }
@@ -118,14 +119,23 @@ export class NavbarComponent implements OnInit {
   }
 
   isLoggedIn(): boolean {
-    
+
     return this.authService.isLoggedIn();
   }
 
   login(): void {
-    this.router.navigate(['/login']);
+    if (!this.isLoggedIn()) {
+      this.toast.info('Please login first!');
+      this.router.navigate(['/login']);
+    }
   }
   
+  signup(): void {
+    if (!this.isLoggedIn()) {
+      this.router.navigate(['/register']);
+    }
+  }
+
   @ViewChild('userDropdown') userDropdown!: ElementRef;
   isUserDropdownOpen = false;
 
@@ -133,7 +143,7 @@ export class NavbarComponent implements OnInit {
     event.stopPropagation();
     this.isUserDropdownOpen = !this.isUserDropdownOpen;
   }
-  
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (!this.userDropdown.nativeElement.contains(event.target)) {
@@ -158,7 +168,7 @@ export class NavbarComponent implements OnInit {
 
   handleCartClick(event: Event): void {
     event.preventDefault();
-    
+
     if (this.isLoggedIn()) {
       // User is logged in, navigate to cart
       this.router.navigate(['/cart']);
@@ -171,7 +181,7 @@ export class NavbarComponent implements OnInit {
 
   handleWishlistClick(event: Event): void {
     event.preventDefault();
-    
+
     if (this.isLoggedIn()) {
       // User is logged in, navigate to wishlist
       this.router.navigate(['/wishlist']);

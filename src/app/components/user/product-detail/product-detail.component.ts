@@ -7,6 +7,7 @@ import { CartService } from '../../../services/cart/get-cart.service';
 import { catchError, of } from 'rxjs';
 import { HotToastService } from '@ngxpert/hot-toast';
 import { WishlistService } from '../../../services/user/wishlist.service';
+import { AuthService } from '../../../services/authService/auth.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -29,6 +30,7 @@ export class ProductDetailComponent implements OnInit {
     private router: Router,
     private cartService: CartService,
     private wishlistService: WishlistService,
+    private authService: AuthService,
     private productService: ProductServiceService,
     private toast:HotToastService
   ) { }
@@ -40,7 +42,9 @@ export class ProductDetailComponent implements OnInit {
       this.loadProductDetails(productId);
     });
 
-    this.loadWishlist()
+    if (this.authService.isLoggedIn()) {
+      this.loadWishlist();
+    }
 
     this.productService.getAllProducts().subscribe(products => {
       this.relatedProducts = products.filter(p => 
@@ -83,6 +87,11 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info("Please login to add item to cart!")
+      return
+    }
+
     if (this.product) {
       
       this.productService.addToCart(this.product, this.quantity).pipe(

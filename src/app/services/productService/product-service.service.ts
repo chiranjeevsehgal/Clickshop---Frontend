@@ -22,7 +22,7 @@ export class ProductServiceService {
       ? new HttpHeaders().set('Authorization', `Bearer ${this.token}`)
       : new HttpHeaders();
 
-    return this.http.get<Product[]>(`${this.apiUrl}/users/products`, {
+    return this.http.get<Product[]>(`${this.apiUrl}/product/products`, {
       headers,
       withCredentials: true
     });

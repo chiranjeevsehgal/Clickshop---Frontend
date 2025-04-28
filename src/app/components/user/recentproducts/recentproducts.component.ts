@@ -6,6 +6,7 @@ import { CartService } from '../../../services/cart/get-cart.service';
 import { NavigationStart, Router } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { HotToastService } from '@ngxpert/hot-toast';
+import { AuthService } from '../../../services/authService/auth.service';
 
 @Component({
   selector: 'app-recentproducts',
@@ -24,6 +25,7 @@ recentProducts: Product[] = [];
     private productService: ProductServiceService,
     private cartService: CartService,
     private wishlistService: WishlistService,
+    private authService: AuthService,
     private router: Router,
     private toast: HotToastService
   ) { 
@@ -35,7 +37,9 @@ recentProducts: Product[] = [];
   }
 
   ngOnInit(): void {
-    this.loadWishlist();
+    if (this.authService.isLoggedIn()) {
+      this.loadWishlist();
+    }
     this.loadRecentProducts();
   }
 
@@ -79,6 +83,10 @@ recentProducts: Product[] = [];
 
   toggleWishlist(event: Event, product: any): void {
     event.stopPropagation(); // Prevent event bubbling
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info("Please login to add items to wishlist!")
+      return
+    }
 
     if (this.isInWishlist(product.id)) {
       this.removeFromWishlist(product.id);
@@ -120,6 +128,11 @@ recentProducts: Product[] = [];
   }
 
   addToCart(product: Product): void {
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info("Please login to add item to cart!")
+      return
+    }
+
     this.productService.addToCart(product).pipe(
       catchError((error) => {
         console.error('Error adding to cart:', error);

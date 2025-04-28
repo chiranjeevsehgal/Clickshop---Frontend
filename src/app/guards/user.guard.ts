@@ -1,4 +1,3 @@
-// src/app/guards/user.guard.ts
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/authService/auth.service';
@@ -7,27 +6,35 @@ import { AuthService } from '../services/authService/auth.service';
   providedIn: 'root'
 })
 export class userGuard implements CanActivate {
-
-  constructor(private authService: AuthService, private router: Router) {}
-
+  
+  constructor(private authService: AuthService, private router: Router) { }
+  
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     const role = this.authService.getUserRole();
-
-    if (
-      this.authService.isLoggedIn() &&
-      (role === 'USER' || role === null)
-    ) {
+    const url = state.url;
+    
+    // Allow access to /products page for all users regardless of login status
+    if (url.includes('/products')) {
       return true;
     }
-
-    if (this.authService.isLoggedIn()) {
-      
-      this.router.navigate(['/admin/dashboard']);
-    } else {
-      // Not logged in
-      this.router.navigate(['/login']);
+    
+    // Allow access if user is logged in with USER role
+    if (this.authService.isLoggedIn() && role === 'USER') {
+      return true;
     }
-
+    
+    // If not logged in, redirect to login page
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return false;
+    }
+    
+    // If logged in but not as USER (i.e., as ADMIN), redirect to admin dashboard
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/admin/dashboard']);
+      return false;
+    }
+    
     return false;
   }
 }

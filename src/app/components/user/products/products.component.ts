@@ -7,6 +7,7 @@ import { CartService } from '../../../services/cart/get-cart.service';
 import { HotToastService } from '@ngxpert/hot-toast';
 import { catchError, of } from 'rxjs';
 import { WishlistService } from '../../../services/user/wishlist.service';
+import { AuthService } from '../../../services/authService/auth.service';
 
 @Component({
   selector: 'app-products',
@@ -35,14 +36,18 @@ export class ProductsComponent implements OnInit {
     private productService: ProductServiceService,
     private cartService: CartService,
     private wishlistService: WishlistService,
+    private authService: AuthService,
     private router: Router,
     private toast: HotToastService,
     private route: ActivatedRoute,
   ) { }
 
   ngOnInit(): void {
-    this.loadWishlist();
     this.loadCategories();
+
+    if (this.authService.isLoggedIn()) {
+      this.loadWishlist();
+    }
 
     // Check for category parameter in URL
     this.route.queryParams.subscribe(params => {
@@ -241,6 +246,11 @@ export class ProductsComponent implements OnInit {
   }
 
   addToCart(product: Product): void {
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info('Please login to add items to cart');
+      return;
+    }
+    
     this.productService.addToCart(product).pipe(
       catchError((error) => {
         console.error('Error adding to cart:', error);
@@ -292,6 +302,11 @@ export class ProductsComponent implements OnInit {
 
   toggleWishlist(event: Event, product: any): void {
     event.stopPropagation(); // Prevent event bubbling
+
+    if (!this.authService.isLoggedIn()) {
+      this.toast.info('Please login to use wishlist features');
+      return;
+    }
 
     if (this.isInWishlist(product.id)) {
       this.removeFromWishlist(product.id);
