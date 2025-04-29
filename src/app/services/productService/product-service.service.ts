@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { Product } from '../../models/Product';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductServiceService {
 
-  private apiUrl = 'http://localhost:8081';
+  private apiUrl = environment.apiUrl;
 
   private token = localStorage.getItem('authToken');
 

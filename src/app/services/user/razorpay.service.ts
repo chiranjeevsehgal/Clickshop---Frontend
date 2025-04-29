@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 declare var Razorpay: any;
 
@@ -8,8 +9,7 @@ declare var Razorpay: any;
   providedIn: 'root'
 })
 export class RazorpayService {
-  // private apiUrl = environment.apiUrl || 'http://localhost:8081';
-  private apiUrl = 'http://localhost:8081/payments';
+  private apiUrl = `${environment.apiUrl}/payments`;
 
   constructor(private http: HttpClient) { }
   

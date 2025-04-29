@@ -4,12 +4,13 @@ import { OrderItem } from '../../models/OrderItem';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../authService/auth.service';
 import { User } from '../../models/User';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrdersService {
-  private apiUrl = 'http://localhost:8081';
+  private apiUrl = environment.apiUrl;
 
   private token = localStorage.getItem('authToken');
 

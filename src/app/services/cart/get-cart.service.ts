@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CartItem } from '../../models/CartItems';
 import { BehaviorSubject, catchError, forkJoin, map, Observable, switchMap, tap } from 'rxjs';
 import { ProductServiceService } from '../productService/product-service.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class CartService {
   cartCount$ = this.cartCountSubject.asObservable();
 
 
-  private apiUrl = 'http://localhost:8081';
+  private apiUrl = environment.apiUrl;
 
   private token = localStorage.getItem('authToken');
 

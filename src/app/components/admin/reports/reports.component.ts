@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Component } from '@angular/core';
 import * as XLSX from 'xlsx'; 
+import { AdminServiceService } from '../../../services/admin/admin-service.service';
 
 @Component({
   selector: 'app-reports',
@@ -18,35 +19,33 @@ export class ReportsComponent {
   flattenedData: any[] = [];
   displayedColumns: string[] = ['image', 'name', 'category', 'quantity', 'price', 'total', 'orderStatus', 'orderDate', 'paymentId'];
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private adminService: AdminServiceService,
+
+  ) {}
 
   // Fetch report data based on selected category
   fetchReport() {
     this.reportData = [];
     this.flattenedData = [];
 
-    if (this.selectedCategory === 'orders' && this.fromDate && this.toDate) {
-      const params = new HttpParams()
-        .set('startDate', this.fromDate)
-        .set('endDate', this.toDate);
+    if (!this.fromDate || !this.toDate) {
+      return;
+    }
 
-      this.http.get<any[]>('http://localhost:8081/orders/between', { params }).subscribe(
+    if (this.selectedCategory === 'orders') {
+      this.adminService.getOrdersBetweenDates(this.fromDate, this.toDate).subscribe(
         res => {
           this.reportData = res;
           this.flattenedData = this.flattenReportData(this.reportData);
-          
-          
         },
         err => {
           console.error('Error fetching report:', err);
         }
       );
-    } else if (this.selectedCategory === 'products' && this.fromDate && this.toDate) {
-      const params = new HttpParams()
-        .set('startDate', this.fromDate)
-        .set('endDate', this.toDate);
-
-      this.http.get<any[]>('http://localhost:8081/product/between', { params }).subscribe(
+    } else if (this.selectedCategory === 'products') {
+      this.adminService.getProductsBetweenDates(this.fromDate, this.toDate).subscribe(
         res => {
           this.reportData = res;
           console.log(this.reportData);
@@ -58,6 +57,7 @@ export class ReportsComponent {
       );
     }
   }
+
 
   // To flatten order data
   flattenReportData(reportData: any[]): any[] {

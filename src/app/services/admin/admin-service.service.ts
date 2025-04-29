@@ -1,14 +1,16 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminServiceService {
-  private apiUrl = 'http://localhost:8081/admin';
-  private apiUrl_Product = 'http://localhost:8081/product';
-  private apiUrl_Orders = 'http://localhost:8081/orders';
+  
+  private apiUrl = `${environment.apiUrl}/admin`;
+  private apiUrl_Product = `${environment.apiUrl}/product`;
+  private apiUrl_Orders = `${environment.apiUrl}/orders`;
 
   constructor(private http: HttpClient) { }
 
@@ -29,6 +31,8 @@ export class AdminServiceService {
       })
     );
   }
+
+  
 
   // Recent orders
   getRecentOrders(limit: number = 5): Observable<any[]> {
@@ -181,15 +185,19 @@ export class AdminServiceService {
   }
 
   // Reports
-  getRevenueReport(startDate: string, endDate: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/reports/revenue?startDate=${startDate}&endDate=${endDate}`, {
-      withCredentials: true
-    });
+  getOrdersBetweenDates(startDate: string, endDate: string): Observable<any[]> {
+    const params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate);
+
+    return this.http.get<any[]>(`${this.apiUrl_Orders}/between`, { params });
   }
 
-  getProductsReport(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/reports/products`, {
-      withCredentials: true
-    });
+  getProductsBetweenDates(startDate: string, endDate: string): Observable<any[]> {
+    const params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate);
+
+    return this.http.get<any[]>(`${this.apiUrl_Product}/between`, { params });
   }
 }
