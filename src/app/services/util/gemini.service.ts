@@ -8,7 +8,9 @@ import { lastValueFrom } from 'rxjs';
 export class GeminiService {
   private apiUrl = 'http://localhost:8081/gemini';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient
+  ) { }
 
   async getAiResponse(prompt: string): Promise<string> {
     const response = await lastValueFrom(
@@ -16,4 +18,12 @@ export class GeminiService {
     );
     return response.response;
   }
+
+  async getAiResponse_Agent(prompt: string): Promise<string> {
+    const response = await lastValueFrom(
+      this.http.post<{ response: string }>(this.apiUrl, { prompt })
+    );
+    return response.response;
+  }
+
 }
