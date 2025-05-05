@@ -1,6 +1,6 @@
 <h1 id="title">Setting up ClickShop - Frontend</h1>
 
-<p id="description">ClickShop is a sleek and scalable eCommerce web app built with Angular 19 Tailwind CSS and TypeScript. It connects to a powerful Spring Boot backend to deliver a seamless shopping experience with features like secure OAuth2 + JWT authentication Razorpay payments AI-powered personalization using Gemini and email notifications via Mailtrap.</p>
+<p id="description">ClickShop is a sleek and scalable eCommerce web app built with Angular 19, Tailwind CSS and TypeScript. It connects to a Spring Boot backend to deliver a seamless shopping experience with features like secure OAuth2 + JWT authentication, Razorpay payments, AI-powered personalization using Gemini and email notifications via Mailtrap.</p>
 
   
   
@@ -38,12 +38,17 @@ npm install
 ng serve
 ```
 
-<p>4. The application should now be running on:</p>
+<p>4. The application will now be running on:</p>
 
 ```
 http://localhost:4200
 ```
 
+<p>5. You can find and configure the backend from the following repository:</p>
+
+```
+https://github.com/chiranjeevsehgal/Clickshop---Backend
+```
   
   
 <h2>Built with</h2>
