@@ -1,59 +1,56 @@
-# Clickshop
+<h1 id="title">Setting up ClickShop - Frontend</h1>
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.1.
+<p id="description">ClickShop is a sleek and scalable eCommerce web app built with Angular 19 Tailwind CSS and TypeScript. It connects to a powerful Spring Boot backend to deliver a seamless shopping experience with features like secure OAuth2 + JWT authentication Razorpay payments AI-powered personalization using Gemini and email notifications via Mailtrap.</p>
 
-## Development server
+  
+  
+<h2>Features</h2>
 
-To start a local development server, run:
+Here're some of the project's best features:
 
-```bash
+*   Secure Authentication – OAuth 2.0 with JWT for protected and role-based access
+*   Smart Order Management – Real-time order tracking with dynamic status updates (Pending Shipped Delivered)
+*   Auto-generated Invoices – Downloadable invoices after each successful payment
+*   Admin Reports Dashboard – Sales revenue and order analytics for admins
+*   Order Alert Emails – Automated order confirmation and shipping update emails via Mailtrap
+*   Razorpay Integration – Seamless secure online payments with transaction tracking
+*   AI Assistance (Gemini) – Smart product recommendations and contextual suggestions
+*   User-Friendly Cart & Checkout – Clean UI for cart updates address management and order placement
+
+<h2>Installation Steps:</h2>
+
+<p>1. Clone the repository:</p>
+
+```
+git clone https://github.com/chiranjeevsehgal/Clickshop---Frontend.git
+cd Clickshop---Frontend
+```
+
+<p>2. Install dependencies:</p>
+
+```
+npm install
+```
+
+<p>3. Start the frontend application:</p>
+
+```
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+<p>4. The application should now be running on:</p>
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+  
+  
+<h2>Built with</h2>
 
-```bash
-ng generate --help
-```
+Technologies used in the project:
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+*   Angular 19
+*   TypeScript
+*   Tailwind CSS
+*   RxJS
